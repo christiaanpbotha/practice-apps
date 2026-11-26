@@ -1,0 +1,1739 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style><meta name="theme-color" content="#121417">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Double Stops">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+</head><body>
+<title>Double Stops & Arpeggios</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..800;1,6..96,400..700&family=Instrument+Sans:wght@400..700&display=swap">
+<style>
+/* Layout: a practice stand. Header + filters, then a two-column stage (ebony fingerboard | chord name and fingering) that stays two columns even on a phone; transport fixed at the bottom. */
+:root{
+  --bg:#E7EAED;
+  --panel:#F4F5F6;
+  --ink:#1A1E25;
+  --muted:#5B626E;
+  --line:#C9CED5;
+  --chip:#DADEE3;
+  --accent:#94590A;
+  --accent-soft:#F0DDB6;
+  --board-edge:rgba(20,16,12,.35);
+  --ebony:#1E1B1A; --ebony-hi:#2C2725; --pegbox:#151312;
+  --nut:#E8DFCB;
+  --string:#8D887F; --string-on:#F4DAA3;
+  --tape:rgba(236,229,214,.15);
+  --ghost:rgba(236,229,214,.30);
+  --note:#E8A63C; --note-ink:#25180A; --note-label:#F5E7C9;
+  --bow:#EEE6D4;
+  --scale-dot:#E9DFC9;
+  --display:"Bodoni Moda","Bodoni 72",Didot,Georgia,serif;
+  --sans:"Instrument Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#121417; --panel:#1A1D22; --ink:#E5E7EA; --muted:#9AA1AB; --line:#2D323A; --chip:#24282E;
+    --accent:#EDB55A; --accent-soft:#3B2F1B; --board-edge:rgba(255,240,215,.10);
+    --ebony:#0C0B0B; --ebony-hi:#1A1716; --pegbox:#070606;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121417; --panel:#1A1D22; --ink:#E5E7EA; --muted:#9AA1AB; --line:#2D323A; --chip:#24282E;
+  --accent:#EDB55A; --accent-soft:#3B2F1B; --board-edge:rgba(255,240,215,.10);
+  --ebony:#0C0B0B; --ebony-hi:#1A1716; --pegbox:#070606;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1040px;margin:0 auto;padding-inline:16px;padding-block:14px 120px;display:flex;flex-direction:column;gap:14px}
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* header */
+.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px 16px}
+.brand h1{font-family:var(--display);font-weight:600;font-size:clamp(24px,6vw,32px);line-height:1.05;margin:0;letter-spacing:-.01em;text-wrap:balance}
+.brand p{margin:3px 0 0;color:var(--muted);font-size:13px}
+.seg{display:inline-flex;background:var(--chip);border-radius:10px;padding:3px;gap:2px;max-width:100%}
+.seg button{border:0;background:transparent;padding:7px 12px;border-radius:8px;font-size:13.5px;font-weight:600;color:var(--muted);white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--panel);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.seg.fam button{padding:7px 10px}
+
+/* filters */
+.filters{display:flex;flex-direction:column;gap:8px}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.sel{position:relative}
+.sel select{appearance:none;-webkit-appearance:none;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:7px 30px 7px 11px;font-weight:600;font-size:14px}
+.sel::after{content:"";position:absolute;right:12px;top:50%;width:6px;height:6px;border-right:1.6px solid var(--muted);border-bottom:1.6px solid var(--muted);transform:translateY(-70%) rotate(45deg);pointer-events:none}
+.toggle{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:7px 11px;font-size:13.5px;font-weight:600;color:var(--muted)}
+.toggle[aria-pressed="true"]{color:var(--ink);border-color:var(--accent);background:var(--accent-soft)}
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;margin-inline:-16px;padding-inline:16px}
+.chips::-webkit-scrollbar{display:none}
+.scaleline{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
+.sl-notes{display:flex;gap:4px;flex-wrap:wrap}
+.sl-n{display:flex;flex-direction:column;align-items:center;min-width:32px;padding:3px 5px 2px;border-radius:8px;background:var(--panel);border:1px solid var(--line)}
+.sl-n b{font-family:var(--display);font-size:15px;line-height:1.1;font-weight:600;color:var(--ink)}
+.sl-n i{font-style:normal;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.sl-n.alt{border-color:var(--accent)}
+.sl-n.alt i{color:var(--accent);font-weight:600}
+.sl-note{font-size:13px;color:var(--muted);flex:1 1 220px;min-width:0;margin:0}
+.chip{flex:0 0 auto;border:1px solid transparent;background:var(--chip);border-radius:999px;padding:5px 11px;font-size:13px;display:inline-flex;align-items:baseline;gap:6px;color:var(--ink)}
+.chip b{font-family:var(--display);font-weight:600;font-size:15px}
+.chip b sup{font-size:.62em;margin-left:1px}
+.chip span{color:var(--muted);font-size:12px}
+.chip .t{color:inherit;font-size:13px}
+.chip em{font-style:normal;color:var(--muted);font-size:11px;font-variant-numeric:tabular-nums}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.chip[aria-pressed="true"] span,.chip[aria-pressed="true"] em{color:var(--bg);opacity:.75}
+.chip[aria-pressed="true"] .t{opacity:1}
+.chip:disabled{opacity:.38;cursor:default}
+
+/* stage */
+.stage{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start}
+.boardbox{min-width:0;touch-action:pan-y}
+.boardbox svg{display:block;width:100%;height:auto;max-height:74vh;margin:0 auto}
+.info{min-width:0;display:flex;flex-direction:column;gap:12px;padding-top:4px}
+.eyebrow{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;font-variant-numeric:tabular-nums}
+.name{margin:0;display:flex;flex-direction:column;gap:2px}
+.num{font-family:var(--display);font-weight:600;font-size:clamp(54px,15vw,96px);line-height:.9;color:var(--accent);letter-spacing:-.02em;overflow-wrap:anywhere}
+.num sup{font-size:.36em;vertical-align:1.2em;margin-left:.05em;letter-spacing:0}
+.name .rest{font-family:var(--display);font-style:italic;font-weight:500;font-size:clamp(17px,4.4vw,24px);line-height:1.15}
+.sub{font-size:14px;color:var(--muted)}
+.sub strong{color:var(--ink);font-weight:600}
+.colour{font-size:13.5px;margin:0;padding:7px 10px;border-radius:8px;background:var(--accent-soft);color:var(--ink)}
+.notes{display:flex;flex-direction:column;border-top:1px solid var(--line)}
+.note{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 10px;padding:9px 0;border-bottom:1px solid var(--line);align-items:baseline}
+.note .nm{font-family:var(--display);font-weight:600;font-size:24px;line-height:1;grid-row:span 2;min-width:2.4em}
+.note .nm small{font-size:.55em;font-weight:500;color:var(--muted)}
+.note .where{font-size:13.5px;font-weight:600}
+.note .role{font-size:12.5px;color:var(--muted)}
+.tip{font-size:13.5px;color:var(--ink);margin:0;max-width:62ch}
+.tip::before{content:"Tip";display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:2px}
+.next{font-size:13px;color:var(--muted);margin:0}
+.next b{color:var(--ink);font-weight:600}
+.empty{background:var(--panel);border:1px dashed var(--line);border-radius:12px;padding:18px;text-align:center;color:var(--muted)}
+.empty button{margin-top:10px}
+.legend{font-size:12px;color:var(--muted);margin:0;display:flex;flex-wrap:wrap;gap:4px 14px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:-1px;margin-right:5px}
+.lg-note{background:var(--note)}
+.lg-ring{border:1.5px solid var(--note);opacity:.8}
+.lg-dot{background:var(--muted);transform:scale(.55)}
+.lg-cream{background:var(--scale-dot);box-shadow:inset 0 0 0 1px var(--line)}
+.lg-open{border:2px solid var(--note);background:var(--pegbox)}
+.strs{display:flex;flex-direction:column;gap:6px}
+.strs-h{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.strs-h span{text-transform:none;letter-spacing:0;font-weight:500;margin-left:4px}
+.srow{display:grid;grid-template-columns:1.1em minmax(0,1fr);gap:6px;align-items:center}
+.sname{font-family:var(--display);font-weight:600;font-size:18px;color:var(--muted)}
+.snotes{display:flex;flex-wrap:wrap;gap:3px}
+.sc{display:flex;flex-direction:column;align-items:center;min-width:25px;padding:2px 3px;border-radius:7px;background:var(--panel);border:1px solid var(--line)}
+.sc b{font-family:var(--display);font-weight:600;font-size:14px;line-height:1.1}
+.sc i{font-style:normal;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.sc.t{background:var(--accent-soft);border-color:var(--accent)}
+.stepkey{color:var(--muted);font-size:12.5px}
+
+/* pieces */
+.piecebar{display:flex;flex-direction:column;gap:10px}
+.glabel{flex:0 0 auto;align-self:center;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;padding-inline:2px 4px}
+.glabel:not(:first-child){margin-left:10px}
+.pchip{flex:0 0 auto;border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:7px 12px;text-align:left;display:flex;flex-direction:column;gap:1px;min-width:0}
+.pchip strong{font-family:var(--display);font-style:italic;font-weight:600;font-size:15.5px;line-height:1.15}
+.pchip span{font-size:11.5px;color:var(--muted)}
+.pchip[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.piecehead{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:8px 18px}
+.piecehead h2{font-family:var(--display);font-weight:600;font-style:italic;font-size:clamp(22px,5.4vw,28px);margin:0;line-height:1.1}
+.piecehead .meta{margin:2px 0 0;font-size:13px;color:var(--muted)}
+.focus{margin:6px 0 0;font-size:13.5px;max-width:62ch}
+.focus b{font-weight:600}
+.pctl{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
+.tempo{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted)}
+.tempo input{accent-color:var(--accent);width:110px}
+.tempo output{font-variant-numeric:tabular-nums;color:var(--ink);font-weight:600;min-width:4.4em}
+.staffbox{overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:12px;scrollbar-width:thin}
+.staffbox svg{display:block}
+.st-line{stroke:var(--ink);stroke-width:1;opacity:.55}
+.st-bar{stroke:var(--ink);stroke-width:1.2}
+.st-thick{stroke:var(--ink);stroke-width:4}
+.st-ink{fill:var(--ink)}
+.st-head{fill:var(--ink)}
+.st-open{fill:none;stroke:var(--ink);stroke-width:1.7}
+.st-stem{stroke:var(--ink);stroke-width:1.3}
+.st-cur .st-head,.st-cur .st-ink{fill:var(--accent)}
+.st-cur .st-open,.st-cur .st-stem{stroke:var(--accent)}
+.st-hl{fill:var(--accent-soft)}
+.st-chord{fill:var(--ink);font:700 13px var(--sans)}
+.st-count{fill:var(--muted);font:500 11px var(--sans)}
+.st-count.b{fill:var(--ink);font-weight:700;font-size:12px}
+.st-swing{fill:var(--muted);font:italic 600 12px var(--display)}
+.st-time{fill:var(--ink);font:800 19px var(--display)}
+.st-hit{fill:transparent;cursor:pointer}
+
+/* transport */
+.transport{position:fixed;left:0;right:0;bottom:0;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--line);z-index:5}
+.tbar{max-width:560px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr 1.25fr 1fr 1fr;gap:8px;align-items:center}
+.tbtn{border:1px solid var(--line);background:var(--panel);border-radius:14px;min-height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11px;font-weight:600;color:var(--muted);padding:4px}
+.tbtn svg{width:22px;height:22px;stroke:var(--ink);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tbtn.main{background:var(--ink);border-color:var(--ink);color:var(--bg);min-height:60px}
+.tbtn.main svg{stroke:var(--bg);fill:var(--bg)}
+.tbtn[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--ink)}
+.tbtn:active{transform:translateY(1px)}
+
+@media (min-width:860px){
+  .stage{grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:36px}
+  .info{padding-top:18px}
+  .note .nm{font-size:28px}
+}
+@media (max-width:360px){
+  .note{grid-template-columns:1fr}
+  .note .nm{grid-row:auto}
+}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1>Double Stops &amp; Arpeggios</h1>
+      <p>Violin double stops and arpeggios, in 1st and 3rd position</p>
+    </div>
+    <div class="seg" role="group" aria-label="Mode">
+      <button id="tab-drill" aria-pressed="true">Double stops</button>
+      <button id="tab-arp" aria-pressed="false">Arpeggios</button>
+      <button id="tab-piece" aria-pressed="false">Pieces</button>
+    </div>
+  </header>
+
+  <section id="drill" class="filters" aria-label="Double stop filters">
+    <div class="row">
+      <label class="sel" for="tonic"><select id="tonic" aria-label="Tonic"></select></label>
+      <label class="sel" for="scale"><select id="scale" aria-label="Scale or mode"></select></label>
+      <div class="seg" role="group" aria-label="Position">
+        <button id="pos1" aria-pressed="true">1st pos</button>
+        <button id="pos3" aria-pressed="false">3rd pos</button>
+      </div>
+      <button id="shuffle" class="toggle" aria-pressed="false">Shuffle</button>
+    </div>
+    <div class="scaleline" id="scaleLine"></div>
+    <div class="row" id="famRow"><div class="seg fam" id="famSeg" role="group" aria-label="Chord family"></div></div>
+    <div class="chips" id="chordChips" role="group" aria-label="Chord"></div>
+    <div class="chips" id="catChips" role="group" aria-label="Interval"></div>
+  </section>
+
+  <section id="piecebar" class="piecebar" hidden>
+    <div class="chips" id="pieceChips" role="group" aria-label="Piece"></div>
+    <div class="piecehead">
+      <div>
+        <h2 id="pTitle"></h2>
+        <p class="meta" id="pMeta"></p>
+        <p class="focus" id="pFocus"></p>
+      </div>
+      <div class="pctl">
+        <label class="tempo" for="bpm"><input id="bpm" type="range" min="40" max="140" step="2" value="72" aria-label="Tempo"><output id="bpmOut"></output></label>
+        <button id="clickT" class="toggle" aria-pressed="true">Click</button>
+        <button id="loopT" class="toggle" aria-pressed="false">Loop</button>
+      </div>
+    </div>
+  </section>
+  <div id="staffbox" class="staffbox" hidden></div>
+
+  <main class="stage" id="stage">
+    <div class="boardbox" id="boardbox"></div>
+    <div class="info" id="info"></div>
+  </main>
+
+  <p class="legend" id="legendStop"><span><i class="lg-note"></i><span id="lgNote">the two notes to play</span></span><span><i class="lg-ring"></i><span id="lgRing">other notes of this chord</span></span><span><i class="lg-dot"></i>rest of the scale</span><span>Faint bands mark the usual beginner tape spots (1, high 2, 3, 4). Swipe the board to change.</span></p>
+  <p class="legend" id="legendArp" hidden><span><i class="lg-note"></i>root</span><span><i class="lg-cream"></i>other notes of the arpeggio</span><span><i class="lg-dot"></i>rest of the scale</span><span><i class="lg-open"></i>open string</span><span>The small number on each note is the finger. Play runs the arpeggio from the lowest root to the highest and back; All arps plays every arpeggio in the scale. Swipe the board to change.</span></p>
+  <p class="legend" id="legendScale" hidden><span><i class="lg-note"></i>home note</span><span><i class="lg-cream"></i>other notes in the scale</span><span><i class="lg-open"></i>open string</span><span>The small number on each note is the finger. Press Play to hear the scale up and down.</span></p>
+</div>
+
+<nav class="transport" aria-label="Transport">
+  <div class="tbar">
+    <button class="tbtn" id="snd" aria-pressed="true" aria-label="Sound on change"><svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></svg>Sound</button>
+    <button class="tbtn" id="prev" aria-label="Previous"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>Prev</button>
+    <button class="tbtn main" id="play" aria-label="Play double stop"><svg viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z"/></svg><span id="playLbl">Play</span></button>
+    <button class="tbtn" id="next" aria-label="Next"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>Next</button>
+    <button class="tbtn" id="alt"><svg viewBox="0 0 24 24"><path d="M5 17h4v-4h4V9h4V5"/></svg><span id="altLbl">Low → high</span></button>
+  </div>
+</nav>
+
+<script>
+(function(){
+"use strict";
+/* ---------- music data ---------- */
+const STR=[{n:'G',m:55},{n:'D',m:62},{n:'A',m:69},{n:'E',m:76}];
+const LET={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
+const LETTERS='CDEFGAB';
+const pcOf=n=>{let p=LET[n[0]];if(n[1]==='♯')p++;if(n[1]==='♭')p--;return (p+12)%12;};
+const KEYS=[
+  {id:'G',label:'G major',sharps:1,names:['G','A','B','C','D','E','F♯']},
+  {id:'D',label:'D major',sharps:2,names:['D','E','F♯','G','A','B','C♯']},
+  {id:'A',label:'A major',sharps:3,names:['A','B','C♯','D','E','F♯','G♯']},
+  {id:'E',label:'E major',sharps:4,names:['E','F♯','G♯','A','B','C♯','D♯']},
+  {id:'C',label:'C major',sharps:0,names:['C','D','E','F','G','A','B']},
+  {id:'F',label:'F major',sharps:0,names:['F','G','A','B♭','C','D','E']},
+  {id:'Bb',label:'B♭ major',sharps:0,names:['B♭','C','D','E♭','F','G','A']}
+];
+KEYS.forEach(k=>{k.pcs=k.names.map(pcOf);});
+const keyById=id=>KEYS.find(k=>k.id===id)||KEYS[1];
+
+/* chord families: roles are chord-tone numbers (1 root, 3, 5, 7, 9, 11, 13) stacked in diatonic thirds */
+const T3=[1,3,5],T7=[1,3,5,7],T9=[1,3,5,7,9],T11=[1,3,5,7,9,11],T13=[1,3,5,7,9,13];
+const FAMILIES=[
+  {id:'3',label:'Triads',must:null,chords:[
+    {num:'I',d:0,sup:'',sfx:'',long:'major',roles:T3},{num:'ii',d:1,sup:'',sfx:'m',long:'minor',roles:T3},
+    {num:'iii',d:2,sup:'',sfx:'m',long:'minor',roles:T3},{num:'IV',d:3,sup:'',sfx:'',long:'major',roles:T3},
+    {num:'V',d:4,sup:'',sfx:'',long:'major',roles:T3},{num:'vi',d:5,sup:'',sfx:'m',long:'minor',roles:T3},
+    {num:'vii°',d:6,sup:'',sfx:'°',long:'diminished',roles:T3}]},
+  {id:'7',label:'7ths',must:7,chords:[
+    {num:'I',d:0,sup:'maj7',sfx:'maj7',long:'major 7th',roles:T7},{num:'ii',d:1,sup:'7',sfx:'m7',long:'minor 7th',roles:T7},
+    {num:'iii',d:2,sup:'7',sfx:'m7',long:'minor 7th',roles:T7},{num:'IV',d:3,sup:'maj7',sfx:'maj7',long:'major 7th',roles:T7},
+    {num:'V',d:4,sup:'7',sfx:'7',long:'dominant 7th',roles:T7},{num:'vi',d:5,sup:'7',sfx:'m7',long:'minor 7th',roles:T7},
+    {num:'vii',d:6,sup:'ø7',sfx:'m7♭5',long:'half-diminished 7th',roles:T7}]},
+  {id:'9',label:'9ths',must:9,chords:[
+    {num:'I',d:0,sup:'maj9',sfx:'maj9',long:'major 9th',roles:T9},{num:'ii',d:1,sup:'9',sfx:'m9',long:'minor 9th',roles:T9},
+    {num:'IV',d:3,sup:'maj9',sfx:'maj9',long:'major 9th',roles:T9},{num:'V',d:4,sup:'9',sfx:'9',long:'dominant 9th',roles:T9},
+    {num:'vi',d:5,sup:'9',sfx:'m9',long:'minor 9th',roles:T9}]},
+  {id:'11',label:'11ths',must:11,chords:[
+    {num:'ii',d:1,sup:'11',sfx:'m11',long:'minor 11th',roles:T11},
+    {num:'IV',d:3,sup:'maj7♯11',sfx:'maj7♯11',long:'major 7th ♯11 (Lydian)',roles:T11},
+    {num:'V',d:4,sup:'11',sfx:'11',long:'dominant 11th, no 3rd',roles:[1,5,7,9,11]},
+    {num:'vi',d:5,sup:'11',sfx:'m11',long:'minor 11th',roles:T11}]},
+  {id:'13',label:'13ths',must:13,chords:[
+    {num:'I',d:0,sup:'maj13',sfx:'maj13',long:'major 13th',roles:T13},{num:'ii',d:1,sup:'13',sfx:'m13',long:'minor 13th',roles:[1,3,5,7,9,11,13]},
+    {num:'IV',d:3,sup:'maj13',sfx:'maj13',long:'major 13th',roles:T13},{num:'V',d:4,sup:'13',sfx:'13',long:'dominant 13th',roles:T13}]}
+];
+const CAT={};
+FAMILIES.forEach(f=>f.chords.forEach(c=>{c.id=c.num+c.sup;c.must=f.must;c.fam=f.id;CAT[c.id]=c;}));
+const ROLE_TXT=(r,rel)=>r===1?'root':r===3?'3rd':r===5?(rel===6?'♭5th':rel===8?'♯5th':'5th'):r===7?'7th':r===9?(rel===1?'♭9th':'9th'):r===11?(rel===6?'♯11th':'11th'):r===13?(rel===8?'♭13th':'13th'):'';
+const IVN={0:'unison',1:'minor 2nd',2:'major 2nd',3:'minor 3rd',4:'major 3rd',5:'perfect 4th',7:'perfect 5th',8:'minor 6th',9:'major 6th',10:'minor 7th',11:'major 7th',12:'octave',13:'minor 9th',14:'major 9th'};
+const CATS=[
+  {id:'all',label:'All intervals'},{id:'3',label:'3rds'},{id:'6',label:'6ths'},{id:'45',label:'4ths & 5ths'},
+  {id:'8',label:'Octaves & unisons'},{id:'29',label:'2nds & 9ths'},{id:'7t',label:'7ths & tritones'}
+];
+const catOf=iv=>(iv===3||iv===4)?'3':(iv===8||iv===9)?'6':(iv===5||iv===7)?'45':(iv===0||iv===12)?'8':(iv===1||iv===2||iv===13||iv===14)?'29':'7t';
+const ORD=['open','1st','2nd','3rd','4th'];
+
+const SHARPS=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
+function chordInfo(key,ch){
+  if(ch.tones) return {sym:ch.sym,long:ch.long,tones:ch.tones};
+  const r=key.names[ch.d];
+  return {sym:r+ch.sfx,long:r+' '+ch.long,tones:ch.roles.map(x=>key.names[(ch.d+x-1)%7])};
+}
+function spell(key,midi){
+  const pc=((midi%12)+12)%12, i=key.pcs.indexOf(pc), name=i>=0?key.names[i]:SHARPS[pc];
+  return {name,oct:Math.floor(midi/12)-1,letter:name[0]};
+}
+function ivLabel(iv,lo,hi){
+  if(iv===6){const d=(LETTERS.indexOf(hi.letter)-LETTERS.indexOf(lo.letter)+7)%7;return d===3?'tritone (augmented 4th)':'tritone (diminished 5th)';}
+  return IVN[iv]||(iv+' semitones');
+}
+/* fingers 1–4 cover four consecutive scale notes; 3rd position starts two scale notes higher */
+function stringMap(key,pos,s){
+  const O=STR[s].m,N=[];
+  if(key.pcs.length<7){ /* pentatonic and blues: finger by hand frame, not by scale step */
+    const map=[]; if(key.pcs.includes(O%12)) map.push({fret:0,finger:0});
+    const a=pos===1?1:4, z=pos===1?7:10;
+    for(let f=a;f<=z;f++) if(key.pcs.includes((O+f)%12)) map.push({fret:f,finger:pos===1?CHROM[f]:CHROM3[f]});
+    return map;
+  }
+  for(let f=1;f<=16;f++) if(key.pcs.includes((O+f)%12)) N.push(f);
+  /* when the open string is outside the key, start one note higher if that puts the 4th finger on the 5th above the open string */
+  const k=(!key.pcs.includes(O%12)&&N[4]!==undefined&&N[4]<=7)?1:0;
+  const fingers=pos===1?N.slice(k,k+4):N.slice(k+2,k+6);
+  const map=[];
+  if(key.pcs.includes(O%12)) map.push({fret:0,finger:0});
+  fingers.forEach((f,i)=>map.push({fret:f,finger:i+1}));
+  return map;
+}
+const CHROM3={4:1,5:1,6:2,7:2,8:3,9:3,10:4,11:4};
+function fingerText(f,fret,pos){
+  if(!f) return 'open';
+  let mod='';
+  if(pos===1){
+    const t={1:{1:'low'},2:{2:'low',3:'low',4:'high'},3:{4:'low',6:'high'},4:{6:'low',8:'high'}}[f];
+    if(t&&t[fret]) mod=t[fret]+' ';
+  }
+  return mod+ORD[f]+' finger';
+}
+function tonesOf(key,ch){return ch.tones?ch.tones.map(pcOf):ch.roles.map(r=>key.pcs[(ch.d+r-1)%7]);}
+function rolesOf(ch){return ch.tones?(ch.roles||[1,3,5,7,9,11,13].slice(0,ch.tones.length)):ch.roles;}
+function place(key,pos,ch,s,a,b,spA,spB){
+  const tones=tonesOf(key,ch), roles=rolesOf(ch), root=ch.tones?pcOf(ch.tones[0]):key.pcs[ch.d];
+  const ma=STR[s].m+a.fret, mb=STR[s+1].m+b.fret, iv=mb-ma;
+  const ia=tones.indexOf(ma%12), ib=tones.indexOf(mb%12);
+  const rf=resolveFingers(a,b); if(!rf) return null;
+  const [fa,fb]=rf;
+  const mk=(si,fr,fi,m,ix,sp)=>{const n={s:si,str:STR[si].n,fret:fr,finger:fi,midi:m,r:ix>=0?roles[ix]:0,...(sp||spell(key,m))};
+    n.acc=n.name.length>1?n.name[1]:'';
+    n.role=ix<0?'passing note':ch.rl?ch.rl[ix]:ROLE_TXT(n.r,(m%12-root+12)%12);n.ftxt=fingerText(fi,fr,pos);return n;};
+  const lo=mk(s,a.fret,fa,ma,ia,spA), hi=mk(s+1,b.fret,fb,mb,ib,spB);
+  return {ch,ci:chordInfo(key,ch),key,pos,pair:s,lo,hi,iv,ivl:ivLabel(iv,lo,hi),cat:catOf(iv),
+    across:!!(fa&&fa===fb&&a.fret===b.fret),sig:ch.id+'|'+s+'|'+ma+'|'+mb};
+}
+/* a single note from a chord, for the arpeggio pieces; lo and hi point at the same note so shared code still works */
+function placeOne(key,pos,ch,s,a,sp){
+  const tones=tonesOf(key,ch), roles=rolesOf(ch), root=ch.tones?pcOf(ch.tones[0]):key.pcs[ch.d];
+  const m=STR[s].m+a.fret, ix=tones.indexOf(m%12);
+  const n={s,str:STR[s].n,fret:a.fret,finger:a.finger,midi:m,r:ix>=0?roles[ix]:0,...(sp||spell(key,m))};
+  n.acc=n.name.length>1?n.name[1]:'';
+  n.role=ix<0?'passing note':ch.rl?ch.rl[ix]:ROLE_TXT(n.r,(m%12-root+12)%12); n.ftxt=fingerText(a.finger,a.fret,pos);
+  return {ch,ci:chordInfo(key,ch),key,pos,pair:s,lo:n,hi:n,iv:0,ivl:'single note',cat:'',kind:'single',across:false,sig:'1|'+s+'|'+m};
+}
+function resolveFingers(a,b){
+  let fa=a.finger, fb=b.finger;
+  if(fa&&fb&&fa===fb&&a.fret!==b.fret){
+    if(a.fret>b.fret){ if(fa<4) fa++; else if(fb>1) fb--; else return null; }
+    else { if(fb<4) fb++; else if(fa>1) fa--; else return null; }
+  }
+  return [fa,fb];
+}
+/* ---------- scales and modes for the trainer ---------- */
+const MAJ=[0,2,4,5,7,9,11], ROMAN=['I','II','III','IV','V','VI','VII'];
+const SCALES=[
+  {id:'major',label:'Major (Ionian)',short:'major',grp:'Major and minor',deg:[[1,0],[2,2],[3,4],[4,5],[5,7],[6,9],[7,11]],note:'The bright home base everything else is measured against.'},
+  {id:'minor',label:'Natural minor (Aeolian)',short:'natural minor',grp:'Major and minor',deg:[[1,0],[2,2],[3,3],[4,5],[5,7],[6,8],[7,10]],note:'Minor with a ♭3, ♭6 and ♭7.'},
+  {id:'harm',label:'Harmonic minor',short:'harmonic minor',grp:'Major and minor',deg:[[1,0],[2,2],[3,3],[4,5],[5,7],[6,8],[7,11]],note:'Natural minor with a raised 7th: a major V chord, and a wide, exotic step from ♭6 up to 7.'},
+  {id:'mel',label:'Melodic minor',short:'melodic minor',grp:'Major and minor',deg:[[1,0],[2,2],[3,3],[4,5],[5,7],[6,9],[7,11]],note:'A minor 3rd with a major 6th and 7th (the jazz melodic minor).'},
+  {id:'dorian',label:'Dorian',short:'Dorian',grp:'Modes',deg:[[1,0],[2,2],[3,3],[4,5],[5,7],[6,9],[7,10]],note:'Minor with a bright major 6th. A fiddle and Celtic favourite.'},
+  {id:'phrygian',label:'Phrygian',short:'Phrygian',grp:'Modes',deg:[[1,0],[2,1],[3,3],[4,5],[5,7],[6,8],[7,10]],note:'Minor with a dark ♭2 right above the home note.'},
+  {id:'lydian',label:'Lydian',short:'Lydian',grp:'Modes',deg:[[1,0],[2,2],[3,4],[4,6],[5,7],[6,9],[7,11]],note:'Major with a floating ♯4.'},
+  {id:'mixo',label:'Mixolydian',short:'Mixolydian',grp:'Modes',deg:[[1,0],[2,2],[3,4],[4,5],[5,7],[6,9],[7,10]],note:'Major with a ♭7, all over bluegrass and Celtic fiddle tunes.'},
+  {id:'locrian',label:'Locrian',short:'Locrian',grp:'Modes',deg:[[1,0],[2,1],[3,3],[4,5],[5,6],[6,8],[7,10]],note:'A ♭2 and ♭5 make the home chord diminished: more colour than resting place.'},
+  {id:'phrydom',label:'Phrygian dominant',short:'Phrygian dominant',grp:'Modes',deg:[[1,0],[2,1],[3,4],[4,5],[5,7],[6,8],[7,10]],note:'Phrygian with a major 3rd: the flamenco and klezmer sound.'},
+  {id:'majpent',label:'Major pentatonic',short:'major pentatonic',grp:'Pentatonic and blues',deg:[[1,0],[2,2],[3,4],[5,7],[6,9]],note:'Five notes and no half steps. Country, bluegrass and folk melodies live here.'},
+  {id:'minpent',label:'Minor pentatonic',short:'minor pentatonic',grp:'Pentatonic and blues',deg:[[1,0],[3,3],[4,5],[5,7],[7,10]],note:'Five notes, 1 ♭3 4 5 ♭7: the backbone of blues and rock.'},
+  {id:'blues',label:'Blues',short:'blues',grp:'Pentatonic and blues',deg:[[1,0],[3,3],[4,5],[5,6],[5,7],[7,10]],note:'Minor pentatonic plus the ♭5, the “blue note”.'}
+];
+const TONICS=[['G','G'],['D','D'],['A','A'],['E','E'],['B','B'],['C','C'],['F','F'],['Bb','B♭']];
+const scaleCache={};
+function buildScale(tid,scId){
+  const ck=tid+'-'+scId; if(scaleCache[ck]) return scaleCache[ck];
+  const sc=SCALES.find(x=>x.id===scId)||SCALES[0], tn=(TONICS.find(t=>t[0]===tid)||TONICS[1])[1];
+  const tpc=pcOf(tn), li=LETTERS.indexOf(tn[0]), names=[], pcs=[], degs=[];
+  sc.deg.forEach(([n,semi])=>{
+    const letter=LETTERS[(li+n-1)%7], pc=(tpc+semi)%12, d=((pc-LET[letter]+18)%12)-6;
+    names.push(letter+(d===1?'♯':d===-1?'♭':'')); pcs.push(pc);
+    const md=semi-MAJ[n-1]; degs.push((md<0?'♭':md>0?'♯':'')+n);
+  });
+  return scaleCache[ck]={id:ck,label:tn+' '+sc.short,names,pcs,degs,scale:sc,hept:sc.deg.length===7};
+}
+const Q7={'4,7,11':['maj7','maj7','major 7th'],'4,7,10':['7','7','dominant 7th'],'3,7,10':['m7','7','minor 7th'],'3,7,11':['m(maj7)','(maj7)','minor-major 7th'],'3,6,10':['m7♭5','ø7','half-diminished 7th'],'3,6,9':['°7','°7','diminished 7th'],'4,8,11':['+maj7','+maj7','augmented major 7th'],'4,6,10':['7♭5','7♭5','dominant 7th ♭5']};
+const Q9={'maj7':['maj9','maj9','major 9th'],'7':['9','9','dominant 9th'],'m7':['m9','9','minor 9th'],'m(maj7)':['m(maj9)','(maj9)','minor-major 9th'],'+maj7':['+maj9','+maj9','augmented major 9th'],'m7♭5':['m9♭5','ø9','half-diminished 9th'],'7♭5':['9♭5','9♭5','dominant 9th ♭5']};
+const Q11m={'m7':['m11','11','minor 11th'],'m(maj7)':['m(maj11)','(maj11)','minor-major 11th'],'m7♭5':['m11♭5','ø11','half-diminished 11th']};
+const Q11s={'maj7':['maj7♯11','maj7♯11','major 7th ♯11 (Lydian)'],'7':['7♯11','7♯11','dominant 7th ♯11 (Lydian dominant)'],'+maj7':['+maj7♯11','+maj7♯11','augmented major 7th ♯11']};
+const Q13={'maj7':['maj13','maj13','major 13th'],'7':['13','13','dominant 13th'],'m7':['m13','13','minor 13th'],'m(maj7)':['m(maj13)','(maj13)','minor-major 13th'],'+maj7':['+maj13','+maj13','augmented major 13th']};
+const TQ={'4,7':['','','major'],'3,7':['m','','minor'],'3,6':['°','°','diminished'],'4,8':['+','+','augmented'],'4,6':['(♭5)','(♭5)','major ♭5']};
+const chordCache={};
+/* stack thirds on every degree of a seven-note scale; extended chords keep only a natural 9th, a clean 11th and a major 13th */
+function buildChords(key,famId){
+  const ck=key.id+'|'+famId; if(chordCache[ck]) return chordCache[ck];
+  const fam=FAMILIES.find(f=>f.id===famId)||FAMILIES[0], out=[];
+  for(let d=0;d<7;d++){
+    const st=k=>(key.pcs[(d+k)%7]-key.pcs[d]+12)%12;
+    const t3=st(2),t5=st(4),t7=st(6),t9=st(1),t11=st(3),t13=st(5);
+    const md=key.scale.deg[d][1]-MAJ[d], base=(md<0?'♭':md>0?'♯':'')+(t3===3?ROMAN[d].toLowerCase():ROMAN[d]);
+    const q7=Q7[t3+','+t5+','+t7], k7=q7&&q7[0];
+    const mk=(q,roles,numSuffix)=>({num:base+(numSuffix||''),sup:q[1],sfx:q[0],long:q[2],roles});
+    let c=null;
+    if(famId==='3'){const q=TQ[t3+','+t5]; if(q) c={num:base+q[1],sup:'',sfx:q[0],long:q[2],roles:[1,3,5]};}
+    else if(famId==='7'){ if(q7) c=mk(q7,[1,3,5,7]); }
+    else if(famId==='9'){ if(q7&&t9===2&&Q9[k7]) c=mk(Q9[k7],[1,3,5,7,9]); }
+    else if(famId==='11'){ if(q7&&t9===2){
+      if(t3===3&&t11===5&&Q11m[k7]) c=mk(Q11m[k7],[1,3,5,7,9,11]);
+      else if(t3===4&&t11===6&&Q11s[k7]) c=mk(Q11s[k7],[1,3,5,7,9,11]);
+      else if(t3===4&&t11===5&&t7===10&&t5===7) c=mk(['11','11','dominant 11th, no 3rd'],[1,5,7,9,11]);
+    } }
+    else if(famId==='13'){ if(q7&&t9===2&&t13===9&&Q13[k7]) c=mk(Q13[k7],(t3===3&&t11===5)?[1,3,5,7,9,11,13]:[1,3,5,7,9,13]); }
+    if(c){c.d=d;c.id=c.num+c.sup;c.must=fam.must;c.fam=famId;out.push(c);}
+  }
+  return chordCache[ck]=out;
+}
+function placePair(key,pos,s,a,b){
+  const rf=resolveFingers(a,b); if(!rf) return null;
+  const [fa,fb]=rf, ma=STR[s].m+a.fret, mb=STR[s+1].m+b.fret, iv=mb-ma;
+  const mk=(si,fr,fi,m)=>{const n={s:si,str:STR[si].n,fret:fr,finger:fi,midi:m,...spell(key,m)};n.acc=n.name.length>1?n.name[1]:'';
+    n.deg=key.degs[key.pcs.indexOf(m%12)];n.r=1;n.role=n.deg;n.ftxt=fingerText(fi,fr,pos);return n;};
+  const lo=mk(s,a.fret,fa,ma), hi=mk(s+1,b.fret,fb,mb);
+  return {ch:{num:lo.deg+'–'+hi.deg,sup:'',id:'pair',must:null},kind:'pair',ci:{sym:key.label,long:key.label,tones:key.names},key,pos,pair:s,lo,hi,iv,
+    ivl:ivLabel(iv,lo,hi),cat:catOf(iv),across:!!(fa&&fa===fb&&a.fret===b.fret),sig:'p|'+s+'|'+ma+'|'+mb,degs:[lo.deg,hi.deg]};
+}
+const cache={};
+function buildStops(key,pos,famId){
+  const ck=key.id+pos+(key.hept===false?'pairs':famId); if(cache[ck]) return cache[ck];
+  const maps=[0,1,2,3].map(s=>stringMap(key,pos,s)), out=[];
+  if(key.hept===false){
+    for(let s=0;s<3;s++) for(const a of maps[s]) for(const b of maps[s+1]){
+      if(pos===3&&!a.finger&&!b.finger) continue;
+      if(STR[s+1].m+b.fret<STR[s].m+a.fret) continue;
+      const st=placePair(key,pos,s,a,b); if(st) out.push(st);
+    }
+    return cache[ck]=out;
+  }
+  const fam=FAMILIES.find(f=>f.id===famId)||FAMILIES[0];
+  const chords=key.scale?buildChords(key,famId):fam.chords;
+  chords.forEach(ch=>{
+    const tones=tonesOf(key,ch);
+    for(let s=0;s<3;s++) for(const a of maps[s]) for(const b of maps[s+1]){
+      if(pos===3&&!a.finger&&!b.finger) continue;
+      const ma=STR[s].m+a.fret, mb=STR[s+1].m+b.fret;
+      if(mb<ma) continue;
+      const ia=tones.indexOf(ma%12), ib=tones.indexOf(mb%12);
+      if(ia<0||ib<0) continue;
+      if(fam.must&&ch.roles[ia]!==fam.must&&ch.roles[ib]!==fam.must) continue;
+      const st=place(key,pos,ch,s,a,b); if(st) out.push(st);
+    }
+  });
+  return cache[ck]=out;
+}
+function tipFor(st){
+  const {lo,hi,iv}=st;
+  if(!lo.finger&&!hi.finger) return 'Both strings open. Use it to check the bow: equal weight on both strings, hair flat, contact point steady between bridge and fingerboard.';
+  if(iv===0) return `Unison: ${ORD[lo.finger]} finger on the ${lo.str} string against the open ${hi.str}. Nudge the finger until the beating stops and the two sound as one note.`;
+  if(!lo.finger||!hi.finger){const f=lo.finger?lo:hi,o=lo.finger?hi:lo;return `Tune the stopped ${f.name} against the open ${o.str} string. Sound the open string first, add the finger, and move it until the ${st.ivl.replace(/ \(.*/,'')} settles with no beats.`;}
+  if(st.across) return `One finger covers both strings. Lay the pad of your ${ORD[lo.finger]} finger flat across ${lo.str} and ${hi.str} so both notes speak, and keep the knuckle from collapsing.`;
+  if(iv===3||iv===4) return `Third: the ${lo.str}-string finger sits further up the board than the ${hi.str}-string finger. Keep both curved so neither touches its neighbour, and tune the bottom note first.`;
+  if(iv===8||iv===9) return `Sixth: the fingers sit almost side by side, the ${hi.str}-string finger one notch nearer the bridge. Place them together as one shape rather than one after the other.`;
+  if(iv===5) return `Fourth: the ${lo.str}-string finger is one finger ahead of the ${hi.str}-string finger. A fourth should sound hollow and clear; any beating means the top note needs adjusting.`;
+  if(iv===12) return 'Octave: set the frame from the hand, not by reaching with the top finger. The upper note should disappear into the lower one when it is in tune.';
+  if(iv===6) return 'Tritone: the tense core of the dominant sound. Play it, then resolve each note by a half or whole step and listen to the tension drain away.';
+  if(iv===1) return 'Minor 2nd: the tightest rub there is. Keep both notes clean and still, so the crunch sounds deliberate rather than out of tune.';
+  if(iv===2) return 'Major 2nd: a deliberate, shimmery clash. Keep both notes clean and in tune so the rub sounds intended.';
+  if(iv===13||iv===14) return 'A real ninth across two strings: the top note sits a step above the octave. Keep the hand frame steady and let the lower finger anchor it.';
+  if(iv===10) return 'Minor 7th: a wide, open stretch. Keep the lower note solid and lean the top note in from above.';
+  if(iv===11) return 'Major 7th: bright and a little edgy, a half step short of the octave. Check the top note against an imagined octave, then pull it down.';
+  return 'Play the lower note alone, add the upper note, and adjust until the interval settles.';
+}
+
+/* ---------- pieces ---------- */
+/* arpeggio pieces are single lines: [chord or '' to keep, length in quarter notes, string, note]; rests: ['r', length] */
+const ARP_PIECES=[
+ {id:'danube',group:'arp',title:'The Blue Danube',tag:'Strauss · 3/4',credit:'Johann Strauss II, 1867, the waltz theme (simplified ending)',key:'D',time:[3,4],bpm:132,unit:'q',
+  focus:'<b>A D major arpeggio, then an A7.</b> The tune climbs D–F♯–A and the answering pairs drop in from above. The low C♯ sits on the G string with the 3rd finger; keep the hand in place so the B on the A string is just the 1st finger.',
+  bars:[
+  [['r',2],['I',1,'D','D4']],[['',1,'D','D4'],['',1,'D','F#4'],['',1,'A','A4']],[['',3,'A','A4']],[['r',1],['',1,'E','A5'],['',1,'E','A5']],[['r',1],['',1,'E','F#5'],['',1,'E','F#5']],
+  [['r',2],['',1,'D','D4']],[['',1,'D','D4'],['',1,'D','F#4'],['',1,'A','A4']],[['',3,'A','A4']],[['r',1],['V7',1,'E','A5'],['',1,'E','A5']],[['r',1],['',1,'E','G5'],['',1,'E','G5']],
+  [['r',2],['V9',1,'G','C#4']],[['',1,'G','C#4'],['',1,'D','E4'],['',1,'A','B4']],[['',3,'A','B4']],[['r',1],['',1,'E','B5'],['',1,'E','B5']],[['r',1],['V7',1,'E','G5'],['',1,'E','G5']],
+  [['r',2],['V9',1,'G','C#4']],[['',1,'G','C#4'],['',1,'D','E4'],['',1,'A','B4']],[['',3,'A','B4']],[['r',1],['',1,'E','B5'],['',1,'E','B5']],[['r',1],['I',1,'E','F#5'],['',1,'E','F#5']],
+  [['r',2],['',1,'D','D4']],[['',1,'D','D4'],['',1,'D','F#4'],['',1,'A','A4']],[['',3,'A','D5']],[['',3,'A','D5']]]},
+ {id:'nachtarp',group:'arp',title:'Eine kleine Nachtmusik',tag:'Mozart · arpeggio line',credit:'W. A. Mozart, K. 525, opening bars as a single line (an octave below the original)',key:'G',time:[4,4],bpm:96,unit:'q',
+  focus:'<b>The most famous arpeggio in music.</b> G–D–G, then straight up the G major arpeggio, answered by the D7 arpeggio coming back down. Bow the quarter notes short and crisp, and keep the hand still: every note is open or a finger already in place.',
+  bars:[
+  [['I',1,'D','G4'],['r',.5],['',.5,'D','D4'],['',1,'D','G4'],['r',.5],['',.5,'D','D4']],
+  [['',.5,'D','G4'],['',.5,'D','D4'],['',.5,'D','G4'],['',.5,'A','B4'],['',1,'A','D5'],['r',1]],
+  [['V7',1,'A','C5'],['r',.5],['',.5,'A','A4'],['',1,'A','C5'],['r',.5],['',.5,'A','A4']],
+  [['',.5,'A','C5'],['',.5,'A','A4'],['',.5,'D','F#4'],['',.5,'A','A4'],['',1,'D','D4'],['r',1]],
+  [['I',1,'D','G4'],['r',.5],['',.5,'D','D4'],['',1,'D','G4'],['r',.5],['',.5,'D','D4']],
+  [['',.5,'D','G4'],['',.5,'D','D4'],['',.5,'D','G4'],['',.5,'A','B4'],['',1,'A','D5'],['r',1]],
+  [['V7',.5,'A','C5'],['',.5,'A','A4'],['',.5,'D','F#4'],['',.5,'A','A4'],['I',2,'D','G4']]]},
+ {id:'canonarp',group:'arp',title:'Canon in D, broken chords',tag:'Pachelbel · 4/4',credit:'Johann Pachelbel, the chord loop played as arpeggios (arranged)',key:'D',time:[4,4],bpm:72,unit:'q',
+  focus:'<b>Eight arpeggios, up then down.</b> D–A–Bm–F♯m–G–D–G–A, four notes each. The first pass climbs, the second falls. Keep the bow on the string through the crossings so each chord rings like a harp.',
+  bars:[
+  [['I',.5,'D','D4'],['',.5,'D','F#4'],['',.5,'A','A4'],['',.5,'A','D5'],['V',.5,'G','A3'],['',.5,'G','C#4'],['',.5,'D','E4'],['',.5,'A','A4']],
+  [['vi',.5,'G','B3'],['',.5,'D','D4'],['',.5,'D','F#4'],['',.5,'A','B4'],['iii',.5,'G','A3'],['',.5,'G','C#4'],['',.5,'D','F#4'],['',.5,'A','A4']],
+  [['IV',.5,'G','G3'],['',.5,'G','B3'],['',.5,'D','D4'],['',.5,'D','G4'],['I',.5,'G','A3'],['',.5,'D','D4'],['',.5,'D','F#4'],['',.5,'A','A4']],
+  [['IV',.5,'G','B3'],['',.5,'D','D4'],['',.5,'D','G4'],['',.5,'A','B4'],['V',.5,'G','A3'],['',.5,'G','C#4'],['',.5,'D','E4'],['',.5,'A','A4']],
+  [['I',.5,'A','D5'],['',.5,'A','A4'],['',.5,'D','F#4'],['',.5,'D','D4'],['V',.5,'A','C#5'],['',.5,'A','A4'],['',.5,'D','E4'],['',.5,'G','C#4']],
+  [['vi',.5,'A','B4'],['',.5,'D','F#4'],['',.5,'D','D4'],['',.5,'G','B3'],['iii',.5,'A','A4'],['',.5,'D','F#4'],['',.5,'G','C#4'],['',.5,'G','A3']],
+  [['IV',.5,'A','B4'],['',.5,'D','G4'],['',.5,'D','D4'],['',.5,'G','B3'],['I',.5,'A','A4'],['',.5,'D','F#4'],['',.5,'D','D4'],['',.5,'G','A3']],
+  [['IV',.5,'D','G4'],['',.5,'D','D4'],['',.5,'G','B3'],['',.5,'G','G3'],['V',.5,'A','A4'],['',.5,'D','E4'],['',.5,'G','C#4'],['',.5,'G','A3']],
+  [['I',.5,'D','D4'],['',.5,'D','F#4'],['',1,'A','A4'],['',2,'A','D5']]]},
+ {id:'prelude',group:'arp',title:'Prelude in C',tag:'Bach · 16ths',credit:'J. S. Bach, Well-Tempered Clavier I, Prelude BWV 846, bars 1–8 as one line',key:'C',time:[4,4],bpm:52,unit:'q',
+  focus:'<b>One shape, eight chords.</b> Each bar is a five-note arpeggio, then its top three notes again, and the whole figure twice. Learn the left-hand frame for each bar once, then let the right arm do the string crossings in a smooth rolling motion.',
+  chords:{
+   'C':{num:'I',sup:'',sym:'C',long:'C major',tones:['C','E','G']},
+   'Dm7':{num:'ii',sup:'7',sym:'Dm7/C',long:'D minor 7th over C',tones:['D','F','A','C']},
+   'G7':{num:'V',sup:'7',sym:'G7/B',long:'G dominant 7th over B',tones:['G','B','D','F']},
+   'Am':{num:'vi',sup:'',sym:'Am/C',long:'A minor over C',tones:['A','C','E']},
+   'D7':{num:'V/V',sup:'',sym:'D7/C',long:'D7 over C (F♯ leans toward G)',tones:['D','F♯','A','C']},
+   'G':{num:'V',sup:'',sym:'G/B',long:'G major over B',tones:['G','B','D']},
+   'Cmaj7':{num:'I',sup:'maj7',sym:'Cmaj7/B',long:'C major 7th over B',tones:['C','E','G','B']}
+  },
+  bars:[]},
+ {id:'cello',group:'arp',title:'Cello Suite No. 1, Prelude',tag:'Bach · rolling 16ths',credit:'J. S. Bach, BWV 1007, opening bars, two octaves up, closing on the opening figure',key:'G',time:[4,4],bpm:56,unit:'q',
+  focus:'<b>A pedal G under moving arpeggios.</b> The open G string rings at the start of every group while the upper notes rock back and forth. Let the bow rock across the strings from the elbow; the left hand barely moves.',
+  chords:{
+   'G':{num:'I',sup:'',sym:'G',long:'G major',tones:['G','B','D']},
+   'C':{num:'IV',sup:'',sym:'C/G',long:'C major over a G pedal',tones:['C','E','G']},
+   'D7':{num:'V',sup:'7',sym:'D7/G',long:'D7 over a G pedal (B is a leftover from the G chord)',tones:['D','F♯','A','C','G','B'],rl:['root','3rd','5th','7th','pedal','passing note']}
+  },
+  bars:[]}
+];
+(function(){
+  const fig=(ch,ns,dur)=>ns.map((n,i)=>[i===0?ch:'',dur,n[0],n.slice(1)]);
+  const pre=ARP_PIECES.find(p=>p.id==='prelude');
+  const P8=[['C',['GC4','DE4','DG4','AC5','EE5','DG4','AC5','EE5']],['Dm7',['GC4','DD4','AA4','AD5','EF5','AA4','AD5','EF5']],
+    ['G7',['GB3','DD4','DG4','AD5','EF5','DG4','AD5','EF5']],['C',['GC4','DE4','DG4','AC5','EE5','DG4','AC5','EE5']],
+    ['Am',['GC4','DE4','AA4','EE5','EA5','AA4','EE5','EA5']],['D7',['GC4','DD4','DF#4','AA4','AD5','DF#4','AA4','AD5']],
+    ['G',['GB3','DD4','DG4','AD5','EG5','DG4','AD5','EG5']],['Cmaj7',['GB3','GC4','DE4','DG4','AC5','DE4','DG4','AC5']]];
+  pre.bars=P8.map(([c,ns])=>fig(c,ns,.25).concat(fig('',ns,.25)));
+  const cel=ARP_PIECES.find(p=>p.id==='cello');
+  const C4=[['G',['GG3','DD4','AB4','AA4','AB4','DD4','AB4','DD4']],['C',['GG3','DE4','AC5','AB4','AC5','DE4','AC5','DE4']],
+    ['D7',['GG3','DF#4','AC5','AB4','AC5','DF#4','AC5','DF#4']],['G',['GG3','DD4','AB4','AA4','AB4','DD4','AB4','DD4']]];
+  cel.bars=C4.map(([c,ns])=>fig(c,ns,.25).concat(fig('',ns,.25)));
+})();
+/* each note event: [chord or '' to keep, length in quarter notes, lower string, lower note, upper note]; rests: ['r', length] */
+const PIECES=[
+ {id:'waltz',title:'Two-String Waltz',tag:'3/4 · long notes',key:'D',time:[3,4],bpm:72,unit:'q',dbl:[8],
+  focus:'<b>Long notes, steady bow.</b> Half notes and dotted halves give you time to set both fingers and tune. Weight on beat 1, lighter on beat 3.',
+  bars:[
+  [['I',2,'A','A4','F#5'],['',1,'A','D5','A5']],[['IV',2,'A','D5','B5'],['',1,'A','B4','G5']],[['I',3,'A','D5','F#5']],
+  [['V',2,'A','C#5','E5'],['',1,'D','E4','C#5']],[['I',2,'D','F#4','D5'],['',1,'A','A4','F#5']],[['IV',2,'A','B4','G5'],['',1,'A','D5','B5']],
+  [['V',2,'A','C#5','A5'],['',1,'D','E4','C#5']],[['I',3,'D','F#4','D5']],
+  [['vi',2,'A','D5','B5'],['',1,'A','B4','F#5']],[['iii',2,'A','C#5','A5'],['',1,'A','A4','F#5']],[['IV',2,'A','B4','G5'],['',1,'D','G4','D5']],
+  [['I',2,'A','A4','F#5'],['',1,'D','F#4','D5']],[['ii',2,'D','G4','E5'],['',1,'A','B4','G5']],[['V',2,'A','C#5','A5'],['',1,'A','A4','E5']],
+  [['V7',3,'D','G4','C#5']],[['I',3,'D','F#4','D5']]]},
+ {id:'jig',title:'Kettle Jig',tag:'6/8 · long–short',key:'G',time:[6,8],bpm:60,unit:'dq',
+  focus:'<b>The 6/8 lilt.</b> Two big beats per bar, each split in three. Quarter + eighth is the long–short limp; three eighths in a row run straight through. Bar 3 keeps a G held on the D string while the top note moves.',
+  bars:[
+  [['I',1,'D','G4','B4'],['',.5,'D','G4','D5'],['',1,'A','B4','G5'],['',.5,'D','G4','D5']],
+  [['IV',1,'D','E4','C5'],['',.5,'A','C5','E5'],['',1,'A','C5','G5'],['',.5,'A','C5','E5']],
+  [['I',.5,'D','G4','D5'],['',.5,'D','G4','B4'],['',.5,'D','G4','D5'],['',1,'A','B4','G5'],['',.5,'A','D5','B5']],
+  [['V',1,'A','D5','A5'],['',.5,'A','A4','F#5'],['',1.5,'D','F#4','D5']],
+  [['vi',1,'A','B4','G5'],['',.5,'A','B4','E5'],['',1,'D','E4','B4'],['',.5,'D','G4','E5']],
+  [['ii',.5,'A','A4','E5'],['',.5,'A','C5','E5'],['',.5,'A','A4','E5'],['',1.5,'A','C5','A5']],
+  [['V7',1,'A','C5','F#5'],['',.5,'D','F#4','D5'],['',1,'D','D4','C5'],['',.5,'D','D4','A4']],
+  [['I',1,'A','B4','G5'],['',.5,'D','G4','D5'],['',1.5,'G','B3','G4']]]},
+ {id:'shuffle',title:'Back-Porch Shuffle',tag:'swing · 9th chords',key:'D',time:[4,4],bpm:92,unit:'q',swing:true,
+  focus:'<b>Swung eighths.</b> The first eighth of each pair is long, the second short (think “humpty-dumpty”). Watch for rests on the beat with hits on the “&”, and last eighths that push early into the next chord. Every chord is a 9th chord.',
+  bars:[
+  [['Imaj9',1.5,'D','E4','C#5'],['',.5,'D','E4','C#5'],['r',1],['',1,'A','C#5','E5']],
+  [['IVmaj9',1.5,'D','F#4','A4'],['',.5,'D','F#4','A4'],['r',1],['',1,'A','A4','F#5']],
+  [['Imaj9',.5,'D','E4','C#5'],['',.5,'D','F#4','D5'],['',.5,'D','E4','C#5'],['',.5,'D','F#4','D5'],['',1,'D','E4','C#5'],['r',.5],['',.5,'A','A4','E5']],
+  [['r',.5],['Imaj9',.5,'A','C#5','E5'],['r',.5],['',.5,'A','C#5','E5'],['r',.5],['',.5,'A','C#5','E5'],['r',.5],['IVmaj9',.5,'A','B4','A5']],
+  [['IVmaj9',1.5,'A','B4','A5'],['',.5,'A','D5','A5'],['r',1],['',1,'D','F#4','A4']],
+  [['r',.5],['',.5,'A','A4','F#5'],['r',.5],['',.5,'A','A4','F#5'],['',1,'A','D5','A5'],['r',1]],
+  [['Imaj9',1.5,'D','E4','C#5'],['',.5,'D','E4','C#5'],['r',1],['',1,'A','C#5','E5']],
+  [['vi9',1.5,'D','F#4','C#5'],['',.5,'D','F#4','C#5'],['r',.5],['',.5,'A','C#5','F#5'],['',1,'A','C#5','A5']],
+  [['ii9',1,'A','D5','F#5'],['r',.5],['',.5,'A','D5','F#5'],['',1,'A','B4','F#5'],['',1,'D','G4','B4']],
+  [['V9',1.5,'D','G4','B4'],['',.5,'D','G4','B4'],['',1,'A','C#5','B5'],['',1,'A','B4','G5']],
+  [['r',.5],['Imaj9',.5,'D','E4','C#5'],['r',.5],['',.5,'D','E4','C#5'],['',1,'A','C#5','E5'],['',1,'A','A4','E5']],
+  [['V9',.5,'D','G4','B4'],['',.5,'D','E4','B4'],['',.5,'D','G4','B4'],['',.5,'D','E4','B4'],['',2,'A','C#5','B5']]]},
+ {id:'habanera',title:'Harbour Habanera',tag:'2/4 · dotted 16ths',key:'A',time:[2,4],bpm:66,unit:'q',
+  focus:'<b>Dotted eighth + sixteenth.</b> The habanera beat is long–short–even–even: keep the sixteenth short and light, almost a grace note into the next beat. Bar 4 is the 3+3+2 tresillo; bar 6 starts with a sixteenth rest.',
+  bars:[
+  [['vi',.75,'A','A4','F#5'],['',.25,'A','C#5','F#5'],['',.5,'A','C#5','A5'],['',.5,'A','A4','F#5']],
+  [['V7',.75,'A','D5','G#5'],['',.25,'A','B4','G#5'],['',.5,'A','D5','B5'],['',.5,'A','B4','G#5']],
+  [['vi',.75,'A','A4','F#5'],['',.25,'A','C#5','F#5'],['',.5,'A','C#5','A5'],['',.5,'D','F#4','C#5']],
+  [['V7',.75,'D','E4','D5'],['',.75,'D','G#4','E5'],['',.5,'A','B4','E5']],
+  [['IVmaj7',.75,'D','F#4','C#5'],['',.25,'A','D5','F#5'],['',.5,'A','C#5','A5'],['',.5,'A','A4','F#5']],
+  [['r',.25],['V7',.25,'D','E4','B4'],['',.5,'D','E4','D5'],['',1,'A','D5','G#5']],
+  [['Imaj7',.75,'A','C#5','G#5'],['',.25,'A','C#5','E5'],['',.5,'A','A4','E5'],['',.5,'A','C#5','A5']],
+  [['I',.5,'D','E4','C#5'],['',.5,'A','C#5','A5'],['',1,'A','A4','E5']]]},
+ {id:'strut',title:'Eleventh Street Strut',tag:'16ths · 11th & 13th chords',key:'G',time:[4,4],bpm:76,unit:'q',
+  focus:'<b>Straight sixteenths.</b> Count every one: 1 e & a, 2 e & a. Most hits land on the “a” and the “&”, so keep the bow moving through the rests. One finger stays down per bar while the other string moves; the chords are 11ths and 13ths.',
+  bars:[
+  [['ii11',.5,'G','G3','D4'],['r',.25],['',.25,'G','A3','D4'],['r',.5],['',.5,'G','G3','D4'],['r',.25],['',.25,'G','B3','D4'],['',.5,'G','A3','D4'],['',1,'G','G3','D4']],
+  [['ii11',.5,'D','D4','A4'],['r',.25],['',.25,'D','D4','B4'],['r',.5],['',.5,'D','D4','C5'],['r',.25],['',.25,'D','D4','B4'],['',.5,'D','D4','A4'],['r',.5],['',.5,'D','G4','D5']],
+  [['V11',.25,'G','G3','D4'],['',.25,'G','G3','D4'],['r',.5],['',.5,'D','G4','C5'],['r',.25],['',.25,'D','G4','C5'],['r',.5],['',.5,'D','G4','D5'],['',.5,'D','G4','C5'],['',.5,'D','G4','A4']],
+  [['V11',.5,'A','C5','G5'],['r',.25],['',.25,'A','D5','G5'],['r',.5],['',.5,'A','E5','G5'],['r',.25],['',.25,'A','D5','G5'],['',.5,'A','C5','G5'],['',1,'A','A4','G5']],
+  [['IVmaj7♯11',.75,'A','C5','F#5'],['',.25,'A','B4','F#5'],['r',.5],['',.5,'A','C5','F#5'],['',.5,'A','D5','F#5'],['r',.25],['',.25,'A','B4','F#5'],['',1,'A','C5','F#5']],
+  [['vi11',.5,'A','A4','E5'],['r',.25],['',.25,'A','A4','F#5'],['r',.5],['',.5,'A','A4','G5'],['r',.25],['',.25,'A','A4','F#5'],['',.5,'A','A4','E5'],['r',.5],['',.5,'A','D5','A5']],
+  [['ii11',.5,'A','D5','A5'],['r',.25],['',.25,'A','D5','G5'],['r',.5],['',.5,'A','D5','E5'],['r',.25],['',.25,'A','D5','G5'],['',.5,'A','D5','A5'],['r',.5],['',.5,'D','G4','D5']],
+  [['V13',.5,'D','F#4','B4'],['r',.25],['',.25,'A','C5','B5'],['r',.5],['',.5,'A','B4','F#5'],['Imaj13',.5,'D','E4','B4'],['r',.5],['',1,'G','G3','E4']]]},
+ {id:'sailor',group:'classic',title:'Drunken Sailor',tag:'Sea shanty · 2/4',credit:'Traditional sea shanty',key:'G',time:[2,4],bpm:84,unit:'q',
+  focus:'<b>Sixteenth pairs on a held drone.</b> In A Dorian (the notes of G major, centred on A). On “what <i>shall we</i> do <i>with a</i>” keep the open E ringing and tap the 2nd finger C on and off. The chorus slows to quarters.',
+  bars:[
+  [['ii',.5,'A','C5','E5'],['',.25,'A','A4','E5'],['',.25,'A','A4','E5'],['',.5,'A','C5','E5'],['',.25,'A','A4','E5'],['',.25,'A','A4','E5']],
+  [['ii',.5,'A','C5','E5'],['',.5,'D','E4','A4'],['',.5,'D','E4','C5'],['',.5,'A','C5','E5']],
+  [['I',.5,'D','G4','D5'],['',.25,'D','D4','D5'],['',.25,'D','D4','D5'],['',.5,'D','G4','D5'],['',.25,'D','D4','D5'],['',.25,'D','D4','D5']],
+  [['I',.5,'D','G4','D5'],['',.5,'G','B3','G4'],['',.5,'D','G4','B4'],['',.5,'D','G4','D5']],
+  [['ii',.5,'A','C5','E5'],['',.25,'A','A4','E5'],['',.25,'A','A4','E5'],['',.5,'A','C5','E5'],['',.25,'A','A4','E5'],['',.25,'A','A4','E5']],
+  [['ii7',.5,'A','C5','E5'],['',.5,'A','A4','F#5'],['',.5,'A','C5','G5'],['',.5,'A','C5','A5']],
+  [['I',.5,'A','B4','G5'],['',.5,'A','B4','E5'],['',.5,'D','G4','D5'],['',.5,'D','G4','B4']],
+  [['ii',1,'D','E4','A4'],['',1,'G','A3','A4']],
+  [['ii',1,'A','A4','E5'],['',1,'A','C5','E5']],
+  [['ii',.5,'A','C5','E5'],['',.5,'D','E4','A4'],['',.5,'D','E4','C5'],['',.5,'A','C5','E5']],
+  [['I',1,'D','G4','D5'],['',1,'D','D4','D5']],
+  [['I',.5,'D','G4','D5'],['',.5,'G','B3','G4'],['',.5,'D','G4','B4'],['',.5,'D','G4','D5']],
+  [['ii',1,'A','A4','E5'],['',1,'A','C5','E5']],
+  [['ii7',.5,'A','C5','E5'],['',.5,'A','A4','F#5'],['',.5,'A','C5','G5'],['',.5,'A','C5','A5']],
+  [['I',.5,'A','B4','G5'],['',.5,'A','B4','E5'],['',.5,'D','G4','D5'],['',.5,'D','G4','B4']],
+  [['ii',1,'D','E4','A4'],['',1,'G','A3','A4']]]},
+ {id:'ode',group:'classic',title:'Ode to Joy',tag:'Beethoven · 4/4',credit:'Ludwig van Beethoven, Symphony No. 9 (arranged)',key:'D',time:[4,4],bpm:92,unit:'q',
+  focus:'<b>Steady quarters in thirds and sixths.</b> Each phrase ends with a dotted quarter and a quick eighth; bars 10 and 11 add a pair of eighths. Keep every quarter the same length.',
+  bars:[
+  [['I',1,'A','A4','F#5'],['',1,'A','D5','F#5'],['IV',1,'A','B4','G5'],['I',1,'A','D5','A5']],
+  [['V',1,'A','C#5','A5'],['V7',1,'A','A4','G5'],['I',1,'A','D5','F#5'],['V',1,'A','C#5','E5']],
+  [['I',1,'D','F#4','D5'],['',1,'D','A4','D5'],['V',1,'A','C#5','E5'],['I',1,'A','A4','F#5']],
+  [['I',1.5,'A','D5','F#5'],['V',.5,'A','C#5','E5'],['',2,'A','A4','E5']],
+  [['I',1,'A','A4','F#5'],['',1,'A','D5','F#5'],['IV',1,'A','B4','G5'],['I',1,'A','D5','A5']],
+  [['V',1,'A','C#5','A5'],['V7',1,'A','A4','G5'],['I',1,'A','D5','F#5'],['V',1,'A','C#5','E5']],
+  [['I',1,'D','F#4','D5'],['',1,'D','A4','D5'],['V',1,'A','C#5','E5'],['I',1,'A','A4','F#5']],
+  [['V',1.5,'A','C#5','E5'],['I',.5,'D','A4','D5'],['',2,'D','F#4','D5']],
+  [['V',1,'A','C#5','E5'],['',1,'A','A4','E5'],['I',1,'A','A4','F#5'],['',1,'D','F#4','D5']],
+  [['V',1,'A','C#5','E5'],['I',.5,'A','D5','F#5'],['V7',.5,'A','A4','G5'],['I',1,'A','D5','F#5'],['',1,'D','F#4','D5']],
+  [['V',1,'A','C#5','E5'],['I',.5,'A','D5','F#5'],['V7',.5,'A','A4','G5'],['I',1,'A','A4','F#5'],['V',1,'A','C#5','E5']],
+  [['I',1,'D','F#4','D5'],['V',1,'A','C#5','E5'],['',2,'D','E4','A4']],
+  [['I',1,'A','A4','F#5'],['',1,'A','D5','F#5'],['IV',1,'A','B4','G5'],['I',1,'A','D5','A5']],
+  [['V',1,'A','C#5','A5'],['V7',1,'A','A4','G5'],['I',1,'A','D5','F#5'],['V',1,'A','C#5','E5']],
+  [['I',1,'D','F#4','D5'],['',1,'D','A4','D5'],['V',1,'A','C#5','E5'],['I',1,'A','A4','F#5']],
+  [['V',1.5,'A','C#5','E5'],['I',.5,'D','A4','D5'],['',2,'D','F#4','D5']]]},
+ {id:'canon',group:'classic',title:'Canon in D',tag:'Pachelbel · 4/4',credit:'Johann Pachelbel (arranged)',key:'D',time:[4,4],bpm:60,unit:'q',
+  focus:'<b>One chord loop, three rhythms.</b> The eight chords D–A–Bm–F♯m–G–D–G–A repeat underneath. Two passes in half notes, then the famous quarter-note line. Let the lower note move in thirds and sixths under the tune.',
+  bars:[
+  [['I',2,'A','D5','F#5'],['V',2,'A','C#5','E5']],[['vi',2,'D','F#4','D5'],['iii',2,'D','F#4','C#5']],
+  [['IV',2,'D','G4','B4'],['I',2,'D','F#4','A4']],[['IV',2,'D','D4','B4'],['V',2,'D','E4','C#5']],
+  [['I',2,'D','F#4','D5'],['V',2,'D','A4','C#5']],[['vi',2,'D','D4','B4'],['iii',2,'D','F#4','A4']],
+  [['IV',2,'G','B3','G4'],['I',2,'G','A3','F#4']],[['IV',2,'G','G3','G4'],['V',2,'G','A3','E4']],
+  [['I',1,'D','F#4','D5'],['',1,'A','D5','F#5'],['V',1,'A','C#5','A5'],['V7',1,'A','A4','G5']],
+  [['vi',1,'A','B4','F#5'],['',1,'D','F#4','D5'],['iii7',1,'A','A4','F#5'],['',1,'A','C#5','E5']],
+  [['IV',1,'D','G4','D5'],['',1,'D','G4','B4'],['I',1,'D','F#4','D5'],['',1,'D','F#4','A4']],
+  [['IV',1,'G','B3','G4'],['',1,'D','D4','B4'],['V',1,'D','E4','A4'],['V7',1,'G','A3','G4']],
+  [['I',4,'D','F#4','D5']]]},
+ {id:'grace',group:'classic',title:'Amazing Grace',tag:'Hymn · 3/4',credit:'Traditional hymn tune “New Britain”',key:'G',time:[3,4],bpm:76,unit:'q',
+  focus:'<b>Long notes low on the violin.</b> Mostly the G and D strings, with a two-eighth turn in bars 2, 6, 10 and 14. Bar 1 is a pickup: rest for two beats and come in on 3.',
+  bars:[
+  [['r',2],['I',1,'G','G3','D4']],
+  [['I',2,'G','B3','G4'],['',.5,'D','G4','B4'],['',.5,'G','B3','G4']],
+  [['I',2,'D','D4','B4'],['V',1,'D','F#4','A4']],
+  [['IV',2,'G','C4','G4'],['',1,'G','C4','E4']],
+  [['I',2,'G','G3','D4'],['',1,'G','B3','D4']],
+  [['I',2,'G','B3','G4'],['',.5,'D','G4','B4'],['',.5,'G','B3','G4']],
+  [['I',2,'D','D4','B4'],['V',1,'D','F#4','A4']],
+  [['V',3,'D','F#4','D5']],
+  [['V',2,'D','A4','D5'],['I',1,'D','G4','B4']],
+  [['I',2,'D','G4','D5'],['',.5,'D','G4','B4'],['',.5,'G','B3','G4']],
+  [['I',2,'D','D4','B4'],['V',1,'D','D4','A4']],
+  [['IV',2,'G','C4','G4'],['',1,'G','G3','E4']],
+  [['I',2,'G','G3','D4'],['V',1,'G','A3','D4']],
+  [['I',2,'G','B3','G4'],['',.5,'D','G4','B4'],['',.5,'G','B3','G4']],
+  [['I',2,'D','D4','B4'],['V',1,'D','F#4','A4']],
+  [['I',3,'G','G3','G4']]]},
+ {id:'minuet',group:'classic',title:'Minuet in G',tag:'Petzold · 3/4',credit:'Christian Petzold, c. 1725 (long credited to J. S. Bach)',key:'G',time:[3,4],bpm:84,unit:'q',
+  focus:'<b>One quarter, then four eighths.</b> The eighth runs sit over drones: let the open D and G ring, or keep the 1st finger E down in bars 5 and 13, while the top note walks. Several top notes are passing notes between chord tones.',
+  bars:[
+  [['I',1,'D','G4','D5'],['',.5,'G','G3','G4'],['',.5,'D','D4','A4'],['',.5,'D','D4','B4'],['',.5,'D','D4','C5']],
+  [['I',1,'D','G4','D5'],['',1,'G','B3','G4'],['',1,'G','G3','G4']],
+  [['IV',1,'A','C5','E5'],['',.5,'D','E4','C5'],['',.5,'D','G4','D5'],['',.5,'A','C5','E5'],['V',.5,'A','A4','F#5']],
+  [['I',1,'A','B4','G5'],['',1,'G','B3','G4'],['',1,'G','G3','G4']],
+  [['ii',1,'D','E4','C5'],['',.5,'D','E4','D5'],['',.5,'D','E4','C5'],['',.5,'D','E4','B4'],['',.5,'D','E4','A4']],
+  [['I',1,'D','G4','B4'],['',.5,'D','G4','C5'],['',.5,'D','D4','B4'],['',.5,'D','D4','A4'],['',.5,'G','B3','G4']],
+  [['V',1,'G','A3','F#4'],['',.5,'G','A3','G4'],['',.5,'D','D4','A4'],['',.5,'D','D4','B4'],['',.5,'G','D4','G4']],
+  [['V',3,'D','F#4','A4']],
+  [['I',1,'D','G4','D5'],['',.5,'G','G3','G4'],['',.5,'D','D4','A4'],['',.5,'D','D4','B4'],['',.5,'D','D4','C5']],
+  [['I',1,'D','G4','D5'],['',1,'G','B3','G4'],['',1,'G','G3','G4']],
+  [['IV',1,'A','C5','E5'],['',.5,'D','E4','C5'],['',.5,'D','G4','D5'],['',.5,'A','C5','E5'],['V',.5,'A','A4','F#5']],
+  [['I',1,'A','B4','G5'],['',1,'G','B3','G4'],['',1,'G','G3','G4']],
+  [['ii',1,'D','E4','C5'],['',.5,'D','E4','D5'],['',.5,'D','E4','C5'],['',.5,'D','E4','B4'],['',.5,'D','E4','A4']],
+  [['I',1,'D','G4','B4'],['',.5,'D','G4','C5'],['',.5,'D','D4','B4'],['',.5,'D','D4','A4'],['',.5,'G','B3','G4']],
+  [['V',1,'D','F#4','A4'],['',.5,'D','D4','B4'],['',.5,'D','D4','A4'],['',.5,'G','A3','G4'],['',.5,'G','A3','F#4']],
+  [['I',3,'G','B3','G4']]]},
+ {id:'saints',group:'classic',title:'When the Saints',tag:'Spiritual · 4/4',credit:'Traditional spiritual (simplified)',key:'D',time:[4,4],bpm:100,unit:'q',
+  focus:'<b>Entries after the beat.</b> Most phrases start after a rest on beat 1: count “1” silently and come in on 2. The long notes in bars 2 and 4 last a full bar, so keep the bow moving slowly and evenly.',
+  bars:[
+  [['r',1],['I',1,'D','F#4','D5'],['',1,'A','D5','F#5'],['',1,'A','D5','G5']],
+  [['I',4,'A','D5','A5']],
+  [['r',1],['I',1,'D','F#4','D5'],['',1,'A','D5','F#5'],['',1,'A','D5','G5']],
+  [['I',4,'A','A4','A5']],
+  [['r',1],['I',1,'D','F#4','D5'],['',1,'A','D5','F#5'],['',1,'A','D5','G5']],
+  [['I',2,'A','D5','A5'],['',2,'A','A4','F#5']],
+  [['I',2,'D','F#4','D5'],['',2,'A','D5','F#5']],
+  [['V',4,'A','C#5','E5']],
+  [['r',1],['I',1,'A','A4','F#5'],['',1,'A','D5','F#5'],['V',1,'A','C#5','E5']],
+  [['I',3,'D','F#4','D5'],['',1,'D','A4','D5']],
+  [['I',2,'A','D5','F#5'],['',2,'A','D5','A5']],
+  [['I',1,'A','D5','A5'],['IV',3,'A','B4','G5']],
+  [['r',1],['I',1,'A','A4','F#5'],['IV',1,'A','B4','G5'],['I',1,'A','D5','A5']],
+  [['I',2,'A','D5','F#5'],['',2,'D','F#4','D5']],
+  [['V7',2,'D','G4','E5'],['',2,'A','C#5','E5']],
+  [['I',4,'D','F#4','D5']]]},
+ {id:'twinkle',group:'classic',title:'Twinkle, Twinkle',tag:'Mozart · 4/4',credit:'Theme of Mozart’s variations on “Ah vous dirai-je, Maman”, K. 265',key:'D',time:[4,4],bpm:88,unit:'q',
+  focus:'<b>Repeated notes, changing partners.</b> Each melody note is played twice; change the lower note on the repeat where you can. The middle lines use the dominant 7th (A7) under the G.',
+  bars:[
+  [['I',1,'D','F#4','D5'],['',1,'D','A4','D5'],['',1,'A','D5','A5'],['',1,'A','D5','A5']],
+  [['IV',1,'A','D5','B5'],['',1,'A','D5','B5'],['I',2,'A','D5','A5']],
+  [['IV',1,'A','B4','G5'],['',1,'A','D5','G5'],['I',1,'A','A4','F#5'],['',1,'A','D5','F#5']],
+  [['V',1,'A','C#5','E5'],['',1,'A','A4','E5'],['I',2,'D','F#4','D5']],
+  [['I',1,'A','D5','A5'],['',1,'A','D5','A5'],['V7',1,'A','A4','G5'],['',1,'A','A4','G5']],
+  [['I',1,'A','D5','F#5'],['',1,'A','A4','F#5'],['V',2,'A','C#5','E5']],
+  [['I',1,'A','D5','A5'],['',1,'A','D5','A5'],['V7',1,'A','A4','G5'],['',1,'A','A4','G5']],
+  [['I',1,'A','D5','F#5'],['',1,'A','A4','F#5'],['V',2,'A','C#5','E5']],
+  [['I',1,'D','F#4','D5'],['',1,'D','A4','D5'],['',1,'A','D5','A5'],['',1,'A','D5','A5']],
+  [['IV',1,'A','D5','B5'],['',1,'A','D5','B5'],['I',2,'A','D5','A5']],
+  [['IV',1,'A','B4','G5'],['',1,'A','D5','G5'],['I',1,'A','A4','F#5'],['',1,'A','D5','F#5']],
+  [['V',1,'A','C#5','E5'],['',1,'A','A4','E5'],['I',2,'D','F#4','D5']]]},
+ {id:'nacht',group:'classic',title:'Eine kleine Nachtmusik',tag:'Mozart · 4/4',credit:'W. A. Mozart, K. 525, opening theme, bars 1–10 (an octave below the original so it fits first position)',key:'G',time:[4,4],bpm:92,unit:'q',
+  focus:'<b>Crisp notes, real silences, then a singing line.</b> Bars 1–4 are the famous “rocket”: stop the bow dead on every rest. From bar 5 the tune turns lyrical over a held G in the bass, alternating G major and D7. Bars 9–10 change chord every beat and close on G.',
+  bars:[
+  [['I',1,'G','B3','G4'],['r',.5],['',.5,'G','G3','D4'],['',1,'G','B3','G4'],['r',.5],['',.5,'G','G3','D4']],
+  [['I',.5,'G','G3','G4'],['',.5,'G','B3','D4'],['',.5,'G','B3','G4'],['',.5,'D','G4','B4'],['',1,'D','G4','D5'],['r',1]],
+  [['V7',1,'D','D4','C5'],['r',.5],['',.5,'D','D4','A4'],['',1,'D','A4','C5'],['r',.5],['',.5,'D','F#4','A4']],
+  [['V7',.5,'D','D4','C5'],['',.5,'D','F#4','A4'],['',.5,'G','C4','F#4'],['',.5,'D','D4','A4'],['',1,'G','A3','D4'],['r',1]],
+  [['I',.5,'G','B3','G4'],['r',.5],['',1.5,'G','G3','G4'],['',.5,'D','G4','B4'],['',.5,'D','G4','A4'],['',.5,'G','B3','G4']],
+  [['V7',.5,'G','A3','G4'],['',.5,'G','A3','F#4'],['',1.5,'G','C4','F#4'],['',.5,'D','F#4','A4'],['',.5,'D','A4','C5'],['',.5,'G','C4','F#4']],
+  [['I',.5,'D','G4','A4'],['',.5,'G','B3','G4'],['',1.5,'G','G3','G4'],['',.5,'D','G4','B4'],['',.5,'D','G4','A4'],['',.5,'G','B3','G4']],
+  [['V7',.5,'G','A3','G4'],['',.5,'G','A3','F#4'],['',1.5,'G','C4','F#4'],['',.5,'D','F#4','A4'],['',.5,'D','A4','C5'],['',.5,'G','C4','F#4']],
+  [['I',.5,'G','B3','G4'],['',.5,'G','G3','G4'],['V7',.5,'G','A3','F#4'],['',.25,'G','A3','E4'],['',.25,'G','A3','F#4'],['I',.5,'G','B3','G4'],['',.5,'G','D4','G4'],['V7',.5,'D','F#4','A4'],['',.25,'G','C4','G4'],['',.25,'D','F#4','A4']],
+  [['I',.5,'D','G4','B4'],['',.5,'D','D4','B4'],['V7',.5,'D','D4','C5'],['',.25,'D','D4','B4'],['',.25,'D','D4','C5'],['I',1,'D','G4','D5'],['r',1]]]},
+ {id:'silent',group:'classic',title:'Silent Night',tag:'Carol · 3/4',credit:'Franz Gruber, 1818',key:'D',time:[3,4],bpm:66,unit:'q',
+  focus:'<b>A slow, rocking 3/4.</b> Dotted quarter + eighth + quarter, then a long dotted half. The chords are the classic I–V–I–IV–I, with A7 (V7) leading home in bars 18 and 22.',
+  bars:[
+  [['I',1.5,'D','F#4','A4'],['',.5,'D','D4','B4'],['',1,'D','F#4','A4']],[['I',3,'G','A3','F#4']],
+  [['I',1.5,'D','D4','A4'],['',.5,'D','D4','B4'],['',1,'D','D4','A4']],[['I',3,'G','D4','F#4']],
+  [['V',2,'A','C#5','E5'],['',1,'A','A4','E5']],[['V',3,'D','E4','C#5']],
+  [['I',2,'D','F#4','D5'],['',1,'D','A4','D5']],[['I',3,'D','F#4','A4']],
+  [['IV',2,'D','D4','B4'],['',1,'D','G4','B4']],[['IV',1.5,'D','G4','D5'],['',.5,'D','G4','C#5'],['',1,'D','G4','B4']],
+  [['I',1.5,'D','F#4','A4'],['',.5,'D','D4','B4'],['',1,'D','F#4','A4']],[['I',3,'G','A3','F#4']],
+  [['IV',2,'D','D4','B4'],['',1,'D','G4','B4']],[['IV',1.5,'D','G4','D5'],['',.5,'D','G4','C#5'],['',1,'D','G4','B4']],
+  [['I',1.5,'D','D4','A4'],['',.5,'D','D4','B4'],['',1,'D','F#4','A4']],[['I',3,'G','D4','F#4']],
+  [['V',2,'A','C#5','E5'],['',1,'A','A4','E5']],[['V7',1.5,'A','A4','G5'],['',.5,'D','G4','E5'],['',1,'D','E4','C#5']],
+  [['I',3,'D','F#4','D5']],[['I',3,'A','D5','F#5']],
+  [['I',1,'D','F#4','D5'],['',1,'D','F#4','A4'],['',1,'G','A3','F#4']],[['V7',1.5,'D','E4','A4'],['',.5,'G','A3','G4'],['',1,'G','A3','E4']],
+  [['I',3,'G','A3','D4']]]},
+ {id:'auld',group:'classic',title:'Auld Lang Syne',tag:'Scottish · 4/4',credit:'Traditional Scottish air',key:'G',time:[4,4],bpm:76,unit:'q',
+  focus:'<b>The Scotch snap’s gentle cousin.</b> Dotted quarter + eighth on almost every beat 1. Bar 1 is a pickup: rest three beats, play on 4. The last line moves through Em, C and D on its way home.',
+  bars:[
+  [['r',3],['I',1,'G','G3','D4']],
+  [['I',1.5,'G','B3','G4'],['',.5,'G','B3','G4'],['',1,'G','G3','G4'],['',1,'D','G4','B4']],
+  [['V',1.5,'D','D4','A4'],['',.5,'G','A3','G4'],['',1,'D','F#4','A4'],['I',1,'D','D4','B4']],
+  [['I',1.5,'G','B3','G4'],['',.5,'G','G3','G4'],['',1,'D','G4','B4'],['',1,'D','G4','D5']],
+  [['IV',3,'A','C5','E5'],['',1,'D','G4','E5']],
+  [['I',1.5,'D','G4','D5'],['',.5,'D','G4','B4'],['',1,'D','D4','B4'],['',1,'G','B3','G4']],
+  [['V',1.5,'D','D4','A4'],['',.5,'G','A3','G4'],['',1,'D','F#4','A4'],['I',1,'D','D4','B4']],
+  [['vi',1.5,'G','B3','G4'],['',.5,'G','G3','E4'],['IV',1,'G','C4','E4'],['V',1,'G','A3','D4']],
+  [['I',3,'G','G3','G4'],['r',1]]]},
+ {id:'yankee',group:'classic',title:'Yankee Doodle',tag:'Folk · 2/4',credit:'Traditional American',key:'D',time:[2,4],bpm:96,unit:'q',
+  focus:'<b>Running eighths.</b> Even eighth notes all the way, so every double stop gets the same short bow. Change string pairs cleanly: lift the old shape and drop the new one together.',
+  bars:[
+  [['I',.5,'D','F#4','D5'],['',.5,'D','A4','D5'],['',.5,'A','A4','E5'],['',.5,'A','D5','F#5']],
+  [['I',.5,'D','F#4','D5'],['',.5,'A','A4','F#5'],['V',.5,'A','C#5','E5'],['',.5,'D','E4','A4']],
+  [['I',.5,'D','F#4','D5'],['',.5,'D','A4','D5'],['',.5,'A','A4','E5'],['',.5,'A','D5','F#5']],
+  [['I',1,'D','F#4','D5'],['V',1,'D','E4','C#5']],
+  [['I',.5,'D','F#4','D5'],['',.5,'D','A4','D5'],['',.5,'A','A4','E5'],['',.5,'A','D5','F#5']],
+  [['IV',.5,'A','B4','G5'],['',.5,'A','D5','F#5'],['',.5,'D','G4','E5'],['',.5,'D','G4','D5']],
+  [['V',.5,'D','E4','C#5'],['',.5,'D','E4','A4'],['',.5,'D','E4','B4'],['',.5,'D','A4','C#5']],
+  [['I',1,'D','F#4','D5'],['',1,'D','A4','D5']]]},
+ {id:'london',group:'classic',title:'London Bridge',tag:'Nursery · 4/4',credit:'Traditional',key:'D',time:[4,4],bpm:96,unit:'q',
+  focus:'<b>A held finger under a moving tune.</b> In bars 1 and 5 the 3rd finger D stays down on the A string while the top note walks A–B–A–G above it.',
+  bars:[
+  [['I',1.5,'A','D5','A5'],['',.5,'A','D5','B5'],['',1,'A','D5','A5'],['',1,'A','D5','G5']],
+  [['I',1,'A','A4','F#5'],['',1,'A','D5','G5'],['',2,'A','D5','A5']],
+  [['V7',1,'A','C#5','E5'],['',1,'A','A4','F#5'],['',2,'A','A4','G5']],
+  [['I',1,'A','D5','F#5'],['',1,'A','D5','G5'],['',2,'A','D5','A5']],
+  [['I',1.5,'A','D5','A5'],['',.5,'A','D5','B5'],['',1,'A','D5','A5'],['',1,'A','D5','G5']],
+  [['I',1,'A','A4','F#5'],['',1,'A','D5','G5'],['',2,'A','D5','A5']],
+  [['V',2,'A','C#5','E5'],['',2,'A','C#5','A5']],
+  [['I',1,'A','A4','F#5'],['',3,'D','F#4','D5']]]},
+ {id:'frere',group:'classic',title:'Frère Jacques',tag:'Round · 4/4',credit:'Traditional French round',key:'D',time:[4,4],bpm:96,unit:'q',
+  focus:'<b>Quarters, halves, then eighths.</b> Each line doubles up the rhythm. Because it is a round, almost everything sits on the I chord; only the “ding dang dong” dips to A.',
+  bars:[
+  [['I',1,'D','F#4','D5'],['',1,'A','A4','E5'],['',1,'A','D5','F#5'],['',1,'D','A4','D5']],
+  [['I',1,'D','F#4','D5'],['',1,'A','A4','E5'],['',1,'A','D5','F#5'],['',1,'D','F#4','D5']],
+  [['I',1,'A','A4','F#5'],['',1,'A','D5','G5'],['',2,'A','D5','A5']],
+  [['I',1,'A','D5','F#5'],['',1,'A','D5','G5'],['',2,'A','D5','A5']],
+  [['I',.5,'A','D5','A5'],['',.5,'A','D5','B5'],['',.5,'A','D5','A5'],['',.5,'A','D5','G5'],['',1,'A','A4','F#5'],['',1,'D','F#4','D5']],
+  [['I',.5,'A','D5','A5'],['',.5,'A','D5','B5'],['',.5,'A','D5','A5'],['',.5,'A','D5','G5'],['',1,'A','A4','F#5'],['',1,'D','F#4','D5']],
+  [['I',1,'D','F#4','D5'],['V',1,'D','E4','A4'],['I',2,'D','F#4','D5']],
+  [['I',1,'D','A4','D5'],['V',1,'D','E4','A4'],['I',2,'D','F#4','D5']]]},
+ {id:'redclay',group:'bluegrass',title:'Red Clay Breakdown',tag:'Bluegrass · 3+3+2',credit:'Original, in bluegrass style',key:'A',time:[4,4],bpm:104,unit:'q',
+  focus:'<b>The 3+3+2 shuffle.</b> Eight eighths grouped 3–3–2: dotted quarter, dotted quarter, quarter. Accent the start of each group and let the open strings drone. The B part drops to the low strings and rocks between string pairs.',
+  bars:[
+  [['I',1.5,'A','A4','E5'],['',1.5,'A','C#5','E5'],['',1,'A','A4','E5']],
+  [['I',.5,'A','A4','E5'],['',.5,'A','C#5','E5'],['',.5,'A','A4','E5'],['',.5,'A','C#5','E5'],['',.5,'D','E4','C#5'],['',.5,'D','E4','A4'],['',1,'D','E4','C#5']],
+  [['IV',1.5,'A','D5','F#5'],['',1.5,'A','D5','A5'],['',1,'A','D5','F#5']],
+  [['I',.5,'A','C#5','E5'],['',.5,'A','A4','E5'],['',.5,'A','C#5','E5'],['',.5,'A','A4','E5'],['',2,'A','C#5','A5']],
+  [['I',1.5,'A','A4','E5'],['',1.5,'A','C#5','E5'],['',1,'A','A4','E5']],
+  [['IV',.5,'D','F#4','D5'],['',.5,'D','F#4','A4'],['',.5,'D','F#4','D5'],['',.5,'D','F#4','A4'],['',1,'A','D5','F#5'],['',1,'A','A4','F#5']],
+  [['V7',1.5,'A','D5','G#5'],['',1.5,'A','B4','G#5'],['',1,'A','B4','E5']],
+  [['I',.5,'A','C#5','E5'],['',.5,'A','A4','E5'],['',.5,'D','E4','C#5'],['',.5,'D','E4','A4'],['',2,'G','A3','E4']],
+  [['I',.5,'G','C#4','E4'],['',.5,'G','A3','E4'],['',.5,'G','C#4','E4'],['',.5,'G','A3','E4'],['',1,'D','E4','C#5'],['',1,'D','E4','A4']],
+  [['vi',1.5,'D','F#4','C#5'],['',1.5,'D','A4','C#5'],['',1,'D','F#4','A4']],
+  [['IV',.5,'G','A3','F#4'],['',.5,'D','D4','A4'],['',.5,'G','A3','F#4'],['',.5,'D','D4','A4'],['',2,'D','F#4','D5']],
+  [['V',.5,'G','B3','E4'],['',.5,'D','E4','B4'],['',.5,'D','G#4','B4'],['',.5,'D','E4','B4'],['',1,'A','B4','G#5'],['',1,'A','B4','E5']],
+  [['I',1.5,'A','A4','E5'],['',1.5,'A','C#5','E5'],['',1,'A','A4','E5']],
+  [['IV',1.5,'A','D5','F#5'],['',1.5,'A','D5','A5'],['',1,'A','D5','F#5']],
+  [['V7',.5,'D','E4','D5'],['',.5,'D','E4','B4'],['',.5,'D','E4','D5'],['',.5,'D','E4','B4'],['',1,'A','D5','G#5'],['',1,'A','B4','E5']],
+  [['I',1,'A','C#5','A5'],['',1,'A','A4','E5'],['',2,'G','A3','E4']]]},
+ {id:'sawmill',group:'bluegrass',title:'Sawmill Shuffle',tag:'Bluegrass · shuffle',credit:'Original, in bluegrass style',key:'D',time:[4,4],bpm:100,unit:'q',
+  focus:'<b>The Nashville shuffle: long–short–short.</b> Quarter, eighth, eighth, twice per bar, rocking between two string pairs. Keep the bow on the string and let the wrist do the rocking.',
+  bars:[
+  [['I',1,'D','D4','A4'],['',.5,'D','F#4','D5'],['',.5,'D','D4','A4'],['',1,'D','D4','A4'],['',.5,'D','F#4','D5'],['',.5,'D','D4','A4']],
+  [['I',1,'A','A4','F#5'],['',.5,'A','D5','F#5'],['',.5,'A','A4','F#5'],['',1,'A','D5','A5'],['',.5,'A','D5','F#5'],['',.5,'A','A4','F#5']],
+  [['IV',1,'G','G3','D4'],['',.5,'G','B3','G4'],['',.5,'G','G3','D4'],['',1,'D','G4','B4'],['',.5,'D','G4','D5'],['',.5,'D','G4','B4']],
+  [['I',1,'D','F#4','D5'],['',.5,'D','F#4','A4'],['',.5,'D','F#4','D5'],['',2,'D','D4','A4']],
+  [['I',1,'D','D4','A4'],['',.5,'D','F#4','D5'],['',.5,'D','D4','A4'],['',1,'D','D4','A4'],['',.5,'D','F#4','D5'],['',.5,'D','D4','A4']],
+  [['I',1,'A','A4','F#5'],['',.5,'A','D5','F#5'],['',.5,'A','A4','F#5'],['',1,'A','D5','A5'],['',.5,'A','D5','F#5'],['',.5,'A','A4','F#5']],
+  [['V',1,'A','A4','E5'],['',.5,'A','C#5','E5'],['',.5,'A','A4','E5'],['',1,'A','C#5','A5'],['',.5,'A','C#5','E5'],['',.5,'A','A4','E5']],
+  [['V7',1,'D','E4','C#5'],['',.5,'D','G4','C#5'],['',.5,'D','E4','C#5'],['',1,'A','A4','G5'],['',.5,'A','C#5','E5'],['',.5,'A','A4','E5']],
+  [['I',1,'D','F#4','D5'],['',.5,'D','D4','A4'],['',.5,'D','F#4','D5'],['',1,'A','A4','F#5'],['',.5,'A','D5','F#5'],['',.5,'A','A4','F#5']],
+  [['IV',1,'A','B4','G5'],['',.5,'A','D5','G5'],['',.5,'A','B4','G5'],['',1,'A','D5','B5'],['',.5,'A','D5','G5'],['',.5,'A','B4','G5']],
+  [['V7',1,'D','G4','C#5'],['',.5,'D','E4','C#5'],['',.5,'D','G4','C#5'],['',1,'A','A4','G5'],['',.5,'A','C#5','E5'],['',.5,'A','A4','E5']],
+  [['I',1,'D','F#4','D5'],['',.5,'D','F#4','A4'],['',.5,'D','F#4','D5'],['',2,'D','D4','A4']]]},
+ {id:'bourree',group:'classic',title:'Bourrée in E minor',tag:'Bach · 2/2',credit:'J. S. Bach, Lute Suite BWV 996, first section',key:'G',keyLabel:'E minor',time:[2,2],bpm:100,unit:'q',
+  chords:{
+   'i':{num:'i',sup:'',sym:'Em',long:'E minor, the home chord',tones:['E','G','B']},
+   'iv':{num:'iv',sup:'',sym:'Am',long:'A minor',tones:['A','C','E']},
+   'V':{num:'V',sup:'',sym:'B',long:'B major, the dominant (D♯ is its 3rd)',tones:['B','D♯','F♯']},
+   'III':{num:'III',sup:'',sym:'G',long:'G major, the relative major',tones:['G','B','D']},
+   'VI':{num:'VI',sup:'',sym:'C',long:'C major',tones:['C','E','G']},
+   'VII':{num:'VII',sup:'',sym:'D',long:'D major',tones:['D','F♯','A']},
+   'VII7':{num:'VII',sup:'7',sym:'D7',long:'D dominant 7th, pulling towards G',tones:['D','F♯','A','C']}},
+  focus:'<b>Felt in two, played in eighths.</b> Cut time: two big beats per bar. The D♯ and C♯ are the raised notes of E melodic minor, so watch the high 3rd finger on the A string. This first section travels from E minor to G major, as Bach wrote it. Bar 1 is a pickup.',
+  bars:[
+  [['r',3],['i',.5,'A','B4','E5'],['',.5,'A','B4','F#5']],
+  [['i',1,'A','B4','G5'],['iv',.5,'A','A4','F#5'],['',.5,'A','C5','E5'],['V',1,'D','F#4','D#5'],['iv',.5,'A','A4','E5'],['',.5,'A','A4','F#5']],
+  [['i',1,'D','G4','B4'],['V',.5,'D','F#4','C#5'],['',.5,'D','F#4','D#5'],['i',1,'A','B4','E5'],['VII7',.5,'D','F#4','D5'],['',.5,'D','A4','C5']],
+  [['III',1,'D','G4','B4'],['iv',.5,'D','E4','A4'],['',.5,'G','C4','G4'],['V',1,'G','B3','F#4'],['iv',.5,'G','C4','G4'],['',.5,'D','E4','A4']],
+  [['III',.5,'D','G4','B4'],['',.5,'D','G4','A4'],['V',.5,'G','B3','G4'],['',.5,'G','B3','F#4'],['i',1,'G','G3','E4'],['',.5,'A','B4','E5'],['',.5,'A','B4','F#5']],
+  [['i',1,'A','B4','G5'],['iv',.5,'A','A4','F#5'],['',.5,'A','C5','E5'],['V',1,'D','F#4','D#5'],['iv',.5,'A','A4','E5'],['',.5,'A','A4','F#5']],
+  [['i',1,'D','G4','B4'],['V',.5,'D','F#4','C#5'],['',.5,'D','F#4','D#5'],['i',1,'A','B4','E5'],['VII7',.5,'D','F#4','D5'],['',.5,'D','A4','C5']],
+  [['III',1,'D','G4','B4'],['VI',.5,'D','E4','A4'],['',.5,'G','C4','G4'],['VII',1.5,'G','A3','F#4'],['',.5,'G','A3','G4']],
+  [['III',3,'G','B3','G4'],['r',1]]]},
+ {id:'spring',group:'classic',title:'Spring',tag:'Vivaldi · 4/4',credit:'Antonio Vivaldi, The Four Seasons, “Spring”, opening ritornello',key:'E',time:[4,4],bpm:88,unit:'q',
+  focus:'<b>Sixteenth flicks inside an eighth-note pulse.</b> The tune hammers three G♯s, then flicks F♯–E as two sixteenths. Vivaldi plays the phrase loud, then repeats it as a soft echo. Bar 1 is a pickup.',
+  bars:[
+  [['r',3.5],['I',.5,'A','B4','E5']],
+  [['I',.5,'A','B4','G#5'],['',.5,'A','E5','G#5'],['',.5,'A','B4','G#5'],['',.25,'A','B4','F#5'],['',.25,'A','B4','E5'],['',1.5,'A','B4','B5'],['',.25,'A','E5','B5'],['',.25,'A','E5','A5']],
+  [['I',.5,'A','B4','G#5'],['',.5,'A','E5','G#5'],['',.5,'A','B4','G#5'],['',.25,'A','B4','F#5'],['',.25,'A','B4','E5'],['',1.5,'A','B4','B5'],['',.25,'A','E5','B5'],['',.25,'A','E5','A5']],
+  [['I',.5,'A','B4','G#5'],['',.25,'A','E5','A5'],['',.25,'A','E5','B5'],['IV',.5,'A','C#5','A5'],['',.5,'A','C#5','G#5'],['V',.5,'A','B4','F#5'],['',.5,'D','F#4','D#5'],['',.5,'D','F#4','B4'],['I',.5,'A','B4','E5']],
+  [['I',.5,'A','B4','G#5'],['',.5,'A','E5','G#5'],['',.5,'A','B4','G#5'],['',.25,'A','B4','F#5'],['',.25,'A','B4','E5'],['',1.5,'A','B4','B5'],['',.25,'A','E5','B5'],['',.25,'A','E5','A5']],
+  [['I',.5,'A','B4','G#5'],['',.5,'A','E5','G#5'],['',.5,'A','B4','G#5'],['',.25,'A','B4','F#5'],['',.25,'A','B4','E5'],['',1.5,'A','B4','B5'],['',.25,'A','E5','B5'],['',.25,'A','E5','A5']],
+  [['I',.5,'A','B4','G#5'],['',.25,'A','E5','A5'],['',.25,'A','E5','B5'],['IV',.5,'A','C#5','A5'],['',.5,'A','C#5','G#5'],['V',.5,'A','B4','F#5'],['',.5,'D','F#4','D#5'],['',.5,'D','F#4','B4'],['I',.5,'A','B4','E5']]]},
+ {id:'gymno',group:'classic',title:'Gymnopédie No. 1',tag:'Satie · 3/4',credit:'Erik Satie, 1888, first section',key:'D',time:[3,4],bpm:66,unit:'q',
+  chords:{
+   'i':{num:'i',sup:'',sym:'Dm',long:'D minor, borrowed from the minor key',tones:['D','F','A']},
+   'i7':{num:'i',sup:'7',sym:'Dm7',long:'D minor 7th, borrowed from the minor key',tones:['D','F','A','C']},
+   'v':{num:'v',sup:'',sym:'Am',long:'A minor, borrowed from the minor key',tones:['A','C','E']},
+   'v7':{num:'v',sup:'7',sym:'Am7',long:'A minor 7th, borrowed from the minor key',tones:['A','C','E','G']},
+   'v/D':{num:'v',sup:'/D',sym:'Am/D',long:'A minor over a held D in the bass',tones:['A','C','E','D'],rl:['root','3rd','5th','bass note']},
+   'I7':{num:'I',sup:'7',sym:'D7',long:'D dominant 7th',tones:['D','F♯','A','C']}},
+  focus:'<b>Slow 3/4 and long held notes.</b> The famous rocking between Gmaj7 and Dmaj7 runs underneath. Where the tune holds a note for several bars, re-bow it and let the lower note change with the chord. The middle section borrows C♮ and F♮ from D minor.',
+  bars:[
+  [['r',1],['IVmaj7',1,'A','B4','F#5'],['',1,'A','D5','A5']],
+  [['Imaj7',1,'A','D5','G5'],['',1,'A','A4','F#5'],['',1,'D','F#4','C#5']],
+  [['IVmaj7',1,'D','G4','B4'],['',1,'D','G4','C#5'],['',1,'D','G4','D5']],
+  [['Imaj7',3,'D','F#4','A4']],
+  [['IVmaj7',3,'G','B3','F#4']],[['Imaj7',3,'G','A3','F#4']],[['IVmaj7',3,'G','G3','F#4']],[['Imaj7',3,'G','D4','F#4']],
+  [['r',1],['IVmaj7',1,'A','B4','F#5'],['',1,'A','D5','A5']],
+  [['Imaj7',1,'A','D5','G5'],['',1,'A','A4','F#5'],['',1,'D','F#4','C#5']],
+  [['IVmaj7',1,'D','G4','B4'],['',1,'D','G4','C#5'],['',1,'D','G4','D5']],
+  [['Imaj7',3,'D','F#4','A4']],
+  [['iii',3,'D','A4','C#5']],[['vi',3,'A','D5','F#5']],
+  [['ii',3,'G','G3','E4']],[['ii7',3,'G','B3','E4']],[['i',3,'G','A3','E4']],
+  [['v',1,'D','E4','A4'],['',1,'D','E4','B4'],['',1,'D','E4','C5']],
+  [['ii7',1,'A','B4','E5'],['',1,'D','G4','D5'],['',1,'D','G4','B4']],
+  [['ii7',1,'D','G4','D5'],['',1,'D','G4','C5'],['',1,'D','G4','B4']],
+  [['v/D',3,'D','A4','D5']],
+  [['I7',2,'D','F#4','D5'],['',1,'D','A4','D5']],
+  [['i7',1,'A','C5','E5'],['',1,'A','C5','F5'],['',1,'A','C5','G5']],
+  [['v/D',1,'A','C5','A5'],['',1,'D','E4','C5'],['',1,'D','E4','D5']],
+  [['ii7',1,'A','B4','E5'],['',1,'D','G4','D5'],['',1,'D','G4','B4']],
+  [['v/D',3,'D','A4','D5']],
+  [['I7',2,'D','F#4','D5'],['',1,'D','A4','D5']],
+  [['ii',3,'A','B4','G5']],[['iii',3,'A','A4','F#5']],
+  [['vi',1,'D','F#4','B4'],['',1,'D','F#4','A4'],['',1,'D','D4','B4']],
+  [['V',1,'D','E4','C#5'],['',1,'D','E4','D5'],['',1,'A','C#5','E5']],
+  [['iii7',1,'D','E4','C#5'],['',1,'D','E4','D5'],['',1,'A','A4','E5']],
+  [['ii7',3,'G','B3','F#4']],[['v7',3,'D','E4','C5']],[['I',3,'D','F#4','D5']]]}
+];
+const CHROM={0:0,1:1,2:1,3:2,4:2,5:3,6:3,7:4,8:4};
+const spOf=n=>{const m=n.match(/^([A-G])(#|b)?(\d)$/);return {name:m[1]+(m[2]==='#'?'♯':m[2]==='b'?'♭':''),oct:+m[3],letter:m[1]};};
+const midiOf=n=>{const m=n.match(/^([A-G])(#|b)?(\d)$/);return (+m[3]+1)*12+LET[m[1]]+(m[2]==='#'?1:m[2]==='b'?-1:0);};
+const DUR={.25:'sixteenth note',.5:'eighth note',.75:'dotted eighth',1:'quarter note',1.5:'dotted quarter',2:'half note',3:'dotted half note',4:'whole note'};
+const WARN=[];
+function buildPiece(def){
+  const key=keyById(def.key), bpb=def.time[0]*4/def.time[1], events=[], steps=[];
+  let cur=null;
+  def.bars.forEach((bar,bi)=>{
+    let p=0;
+    bar.forEach(ev=>{
+      if(ev[0]==='r'){events.push({rest:true,dur:ev[1],bar:bi+1,p});p+=ev[1];return;}
+      if(ev.length===4){ /* single note: [chord, length, string, note] */
+        const [cid,dur,sn,nn]=ev; if(cid) cur=cid;
+        const ch=(def.chords&&def.chords[cur])||CAT[cur], s='GDAE'.indexOf(sn), m=midiOf(nn), fr=m-STR[s].m;
+        const fe=stringMap(key,1,s).find(e=>e.fret===fr)||(fr>=0&&fr<=8?{fret:fr,finger:CHROM[fr]}:null);
+        if(!ch||!fe||s<0) WARN.push(def.id+' bar '+(bi+1)+' '+nn);
+        const st=placeOne(key,1,ch,s,fe||{fret:fr,finger:0},spOf(nn));
+        if(st.lo.r===0) WARN.push(def.id+' bar '+(bi+1)+' non-chord '+nn);
+        Object.assign(st,{dur,bar:bi+1,p,ei:events.length,si:steps.length});
+        events.push(st); steps.push(st); p+=dur; return;
+      }
+      const [cid,dur,sn,ln,hn]=ev; if(cid) cur=cid;
+      const ch=(def.chords&&def.chords[cur])||CAT[cur], s='GDAE'.indexOf(sn), ma=midiOf(ln), mb=midiOf(hn);
+      const fra=ma-STR[s].m, frb=mb-STR[s+1].m;
+      const fa=stringMap(key,1,s).find(e=>e.fret===fra)||(fra>=0&&fra<=8?{fret:fra,finger:CHROM[fra]}:null);
+      const fb=stringMap(key,1,s+1).find(e=>e.fret===frb)||(frb>=0&&frb<=8?{fret:frb,finger:CHROM[frb]}:null);
+      if(!ch||!fa||!fb){WARN.push(def.id+' bar '+(bi+1)+' '+ln+'/'+hn);}
+      const st=place(key,1,ch,s,fa||{fret:fra,finger:0},fb||{fret:frb,finger:0},spOf(ln),spOf(hn));
+      if(st.lo.r===0||st.hi.r===0) WARN.push(def.id+' bar '+(bi+1)+' non-chord '+ln+'/'+hn);
+      Object.assign(st,{dur,bar:bi+1,p,ei:events.length,si:steps.length});
+      events.push(st); steps.push(st); p+=dur;
+    });
+    if(Math.abs(p-bpb)>1e-6) WARN.push(def.id+' bar '+(bi+1)+' length '+p);
+  });
+  return {def,key,bpb,events,steps};
+}
+PIECES.push(...ARP_PIECES);
+const PC={}; PIECES.forEach(d=>{if(d.chords) Object.entries(d.chords).forEach(([k,c])=>{c.id=k;c.must=null;}); PC[d.id]=buildPiece(d);});
+function countOf(pc,p){
+  if(pc.def.time[1]===8){const q=p*2;return Math.abs(q-Math.round(q))<1e-6?String(Math.round(q)+1):'&';}
+  if(pc.def.time[1]===2){const b=Math.floor(p/2+1e-6), f=(p-b*2)/2;return f<.01?String(b+1):(b+1)+(Math.abs(f-.25)<.01?'e':Math.abs(f-.5)<.01?'&':'a');}
+  const b=Math.floor(p+1e-6), f=p-b;
+  return f<.01?String(b+1):(b+1)+(Math.abs(f-.25)<.01?'e':Math.abs(f-.5)<.01?'&':'a');
+}
+
+/* ---------- state ---------- */
+const store={get(k,d){try{const v=localStorage.getItem('dst.'+k);return v===null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem('dst.'+k,JSON.stringify(v));}catch(e){}}};
+const T={ai:0,view:'stop',tonic:store.get('tonic',store.get('key','D')),scale:store.get('scale','major'),pos:store.get('pos',1),fam:store.get('fam','3'),chord:'all',cat:'all',shuffle:false,list:[],i:0};
+const curKey=()=>buildScale(T.tonic,T.scale);
+const P={id:store.get('piece','waltz'),i:0,click:store.get('click',true),loop:false};
+if(!PC[P.id]) P.id='waltz';
+let mode=store.get('mode','drill'), sound=store.get('sound',true);
+const curPiece=()=>PC[P.id];
+const bpmOf=id=>store.get('bpm.'+id,PC[id].def.bpm);
+
+/* ---------- audio ---------- */
+let AC=null,master=null,voices=[];
+function audio(){
+  if(!AC){
+    const C=window.AudioContext||window.webkitAudioContext; if(!C) return null;
+    AC=new C();
+    const comp=AC.createDynamicsCompressor(); comp.threshold.value=-20; comp.ratio.value=3;
+    const b1=AC.createBiquadFilter(); b1.type='peaking'; b1.frequency.value=460; b1.Q.value=1.1; b1.gain.value=4;
+    const b2=AC.createBiquadFilter(); b2.type='peaking'; b2.frequency.value=2900; b2.Q.value=1.3; b2.gain.value=3;
+    master=AC.createGain(); master.gain.value=.9;
+    master.connect(b1); b1.connect(b2); b2.connect(comp); comp.connect(AC.destination);
+  }
+  if(AC.state==='suspended') AC.resume();
+  return AC;
+}
+function hush(){
+  if(!AC) return; const t=AC.currentTime;
+  voices.forEach(v=>{try{v.g.gain.cancelScheduledValues(t);v.g.gain.setValueAtTime(v.g.gain.value,t);v.g.gain.setTargetAtTime(0,t,.02);v.o.forEach(o=>{try{o.stop(t+.12);}catch(e){}});}catch(e){}});
+  voices=[];
+}
+function voice(midi,t0,dur,amp){
+  const c=AC,f=440*Math.pow(2,(midi-69)/12);
+  const g=c.createGain();
+  const att=Math.min(.06,dur*.3);
+  g.gain.setValueAtTime(.0001,t0); g.gain.linearRampToValueAtTime(amp,t0+att);
+  g.gain.setTargetAtTime(amp*.8,t0+att,.25); g.gain.setTargetAtTime(.0001,t0+dur,.06);
+  const lp=c.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=Math.min(5200,f*7); lp.Q.value=.8;
+  const mix=c.createGain(); mix.gain.value=.45;
+  const o1=c.createOscillator(); o1.type='sawtooth'; o1.frequency.value=f;
+  const o2=c.createOscillator(); o2.type='sawtooth'; o2.frequency.value=f; o2.detune.value=6;
+  const o3=c.createOscillator(); o3.type='triangle'; o3.frequency.value=f;
+  const lfo=c.createOscillator(); lfo.frequency.value=5.3;
+  const lg=c.createGain(); lg.gain.setValueAtTime(0,t0); lg.gain.linearRampToValueAtTime(f*.0022,t0+.5);
+  lfo.connect(lg); [o1,o2,o3].forEach(o=>{lg.connect(o.frequency);o.connect(mix);});
+  mix.connect(lp); lp.connect(g); g.connect(master);
+  const end=t0+dur+.45; [o1,o2,o3,lfo].forEach(o=>{o.start(t0);o.stop(end);});
+  voices.push({g,o:[o1,o2,o3,lfo],end});
+}
+function clickAt(t,acc){
+  const c=AC,o=c.createOscillator(),g=c.createGain();
+  o.type='sine'; o.frequency.value=acc?1760:1180;
+  g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(acc?.5:.3,t+.002); g.gain.exponentialRampToValueAtTime(.0001,t+.05);
+  o.connect(g); g.connect(master); o.start(t); o.stop(t+.07);
+  voices.push({g,o:[o],end:t+.07});
+}
+function playStop(st,dur,arp){
+  const c=audio(); if(!c||!st) return; hush();
+  const t=c.currentTime+.03, d=dur||1.7;
+  if(st.kind==='single'){voice(st.lo.midi,t,d,.24);return;}
+  if(arp){voice(st.lo.midi,t,.5,.22);voice(st.hi.midi,t+.55,.5,.22);voice(st.lo.midi,t+1.1,d,.2);voice(st.hi.midi,t+1.1,d,.2);}
+  else{voice(st.lo.midi,t,d,.2);voice(st.hi.midi,t,d,.2);}
+}
+
+/* ---------- fingerboard ---------- */
+const NS='http://www.w3.org/2000/svg';
+const VB_W=250,NUT=66,BPX=468,VB_H=548,CX=142;
+function el(tag,attrs,parent,text){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(text!=null)e.textContent=text;if(parent)parent.appendChild(e);return e;}
+let SCALE_POS={};
+function renderBoard(host,st,key,pos,mode){
+  const maxF=pos===1?8:13;
+  const L=BPX/(1-Math.pow(2,-(maxF+.8)/12));
+  const Y=n=>NUT+L*(1-Math.pow(2,-n/12));
+  const sp=y=>34+12*(y-NUT)/BPX, hw=y=>70+20*(y-NUT)/BPX, SX=(i,y)=>CX+(i-1.5)*sp(y);
+  const svg=el('svg',{viewBox:`0 0 ${VB_W} ${VB_H}`,role:'img','aria-label':st&&st.lo?`Fingerboard: ${st.lo.name}${st.lo.oct} on the ${st.lo.str} string and ${st.hi.name}${st.hi.oct} on the ${st.hi.str} string`:'Fingerboard'});
+  const defs=el('defs',{},svg);
+  const gr=el('linearGradient',{id:'eb',x1:0,x2:1,y1:0,y2:0},defs);
+  el('stop',{offset:0,'stop-color':'var(--ebony)'},gr);el('stop',{offset:.5,'stop-color':'var(--ebony-hi)'},gr);el('stop',{offset:1,'stop-color':'var(--ebony)'},gr);
+  const fade=el('linearGradient',{id:'fd',x1:0,x2:0,y1:0,y2:1},defs);
+  el('stop',{offset:.9,'stop-color':'#fff'},fade);el('stop',{offset:1,'stop-color':'#000'},fade);
+  const mk=el('mask',{id:'fm'},defs); el('rect',{x:0,y:0,width:VB_W,height:VB_H,fill:'url(#fd)'},mk);
+  const g=el('g',{mask:'url(#fm)'},svg);
+  el('rect',{x:CX-hw(NUT)+12,y:24,width:2*hw(NUT)-24,height:NUT-22,rx:10,fill:'var(--pegbox)'},g);
+  el('path',{d:`M${CX-hw(NUT)} ${NUT} L${CX+hw(NUT)} ${NUT} L${CX+hw(VB_H)} ${VB_H} L${CX-hw(VB_H)} ${VB_H}Z`,fill:'url(#eb)',stroke:'var(--board-edge)','stroke-width':1},g);
+  [2,4,5,7].forEach(n=>{const y=Y(n);el('rect',{x:CX-hw(y)+2,y:y-1.5,width:2*hw(y)-4,height:3,fill:'var(--tape)'},g);});
+  el('rect',{x:CX-hw(NUT)-1,y:NUT-5,width:2*hw(NUT)+2,height:6,rx:1.5,fill:'var(--nut)'},g);
+  const act=st&&st.lo?[st.lo.s,st.hi.s]:[];
+  [2.7,2.1,1.6,1.1].forEach((w,i)=>{
+    const on=act.includes(i), x0=SX(i,NUT), x1=SX(i,VB_H);
+    if(on) el('path',{d:`M${x0} ${NUT-40} L${x0} ${NUT} L${x1} ${VB_H}`,stroke:'var(--note)','stroke-width':w+5,opacity:.16,fill:'none'},g);
+    el('path',{d:`M${x0} ${NUT-40} L${x0} ${NUT} L${x1} ${VB_H}`,stroke:on?'var(--string-on)':'var(--string)','stroke-width':on?w+.5:w,fill:'none',opacity:st&&!on?.6:1},g);
+    el('text',{x:x0,y:15,'text-anchor':'middle','font-family':'var(--sans)','font-size':13,'font-weight':700,fill:on?'var(--accent)':'var(--muted)'},svg,STR[i].n);
+  });
+  const maps=[0,1,2,3].map(s=>stringMap(key,pos,s));
+  const ff=maps.flatMap(m=>m.filter(e=>e.finger).map(e=>e.fret));
+  const y1=Y(Math.min(...ff)),y2=Y(Math.max(...ff));
+  el('path',{d:`M30 ${y1} H24 V${y2} H30`,stroke:'var(--muted)','stroke-width':1.2,fill:'none'},svg);
+  el('text',{x:15,y:(y1+y2)/2,transform:`rotate(-90 15 ${(y1+y2)/2})`,'text-anchor':'middle','font-family':'var(--sans)','font-size':11,'font-weight':600,'letter-spacing':'.06em',fill:'var(--muted)'},svg,pos===1?'1ST POSITION':'3RD POSITION');
+  if(mode==='arp'){
+    const A=st; svg.setAttribute('aria-label',`${A.sym} arpeggio in ${pos===1?'1st':'3rd'} position`);
+    SCALE_POS={};
+    maps.forEach((m,s)=>m.forEach(e=>{
+      if(pos===3&&!e.fret) return;
+      const midi=STR[s].m+e.fret; if(A.tones.includes(midi%12)) return;
+      const y=e.fret?Y(e.fret):NUT-24; el('circle',{cx:SX(s,e.fret?y:NUT),cy:y,r:2.8,fill:'var(--ghost)'},g);
+    }));
+    A.notes.forEach(e=>{
+      const s=e.s, y=e.fret?Y(e.fret):NUT-24, x=SX(s,e.fret?y:NUT), isR=e.r===1, nm=e.name, fs=nm.length>1?10.5:12.5;
+      if(e.fret){
+        el('circle',{cx:x,cy:y,r:12,fill:isR?'var(--note)':'var(--scale-dot)'},svg);
+        el('text',{x,y:y+4,'text-anchor':'middle','font-family':'var(--sans)','font-size':fs,'font-weight':700,fill:'var(--note-ink)'},svg,nm);
+        el('circle',{cx:x+11.5,cy:y-10.5,r:6.2,fill:'var(--ebony)',stroke:isR?'var(--note)':'var(--scale-dot)','stroke-width':1.2},svg);
+        el('text',{x:x+11.5,y:y-7.4,'text-anchor':'middle','font-family':'var(--sans)','font-size':8.5,'font-weight':700,fill:'var(--note-label)'},svg,e.finger);
+      }else{
+        el('circle',{cx:x,cy:y,r:12,fill:'var(--pegbox)',stroke:isR?'var(--note)':'var(--scale-dot)','stroke-width':2.4},svg);
+        el('text',{x,y:y+4,'text-anchor':'middle','font-family':'var(--sans)','font-size':fs,'font-weight':700,fill:isR?'var(--note)':'var(--note-label)'},svg,nm);
+      }
+      SCALE_POS[s+'-'+e.fret]={x,y};
+    });
+    el('circle',{id:'scRing',cx:0,cy:0,r:16.5,fill:'none',stroke:'var(--string-on)','stroke-width':3,opacity:0},svg);
+    host.replaceChildren(svg); return;
+  }
+  if(mode==='scale'){
+    svg.setAttribute('aria-label',`All notes of ${key.label} in ${pos===1?'1st':'3rd'} position`);
+    SCALE_POS={};
+    const tonic=key.pcs[0];
+    maps.forEach((m,s)=>m.forEach(e=>{
+      if(pos===3&&!e.fret) return;
+      const y=e.fret?Y(e.fret):NUT-24, x=SX(s,e.fret?y:NUT), midi=STR[s].m+e.fret, nm=spell(key,midi).name, isT=midi%12===tonic;
+      const fs=nm.length>1?10.5:12.5;
+      if(e.fret){
+        el('circle',{cx:x,cy:y,r:12,fill:isT?'var(--note)':'var(--scale-dot)'},svg);
+        el('text',{x,y:y+4,'text-anchor':'middle','font-family':'var(--sans)','font-size':fs,'font-weight':700,fill:'var(--note-ink)'},svg,nm);
+        el('circle',{cx:x+11.5,cy:y-10.5,r:6.2,fill:'var(--ebony)',stroke:isT?'var(--note)':'var(--scale-dot)','stroke-width':1.2},svg);
+        el('text',{x:x+11.5,y:y-7.4,'text-anchor':'middle','font-family':'var(--sans)','font-size':8.5,'font-weight':700,fill:'var(--note-label)'},svg,e.finger);
+      }else{
+        el('circle',{cx:x,cy:y,r:12,fill:'var(--pegbox)',stroke:isT?'var(--note)':'var(--scale-dot)','stroke-width':2.4},svg);
+        el('text',{x,y:y+4,'text-anchor':'middle','font-family':'var(--sans)','font-size':fs,'font-weight':700,fill:isT?'var(--note)':'var(--note-label)'},svg,nm);
+      }
+      SCALE_POS[s+'-'+e.fret]={x,y};
+    }));
+    el('circle',{id:'scRing',cx:0,cy:0,r:16.5,fill:'none',stroke:'var(--string-on)','stroke-width':3,opacity:0},svg);
+    host.replaceChildren(svg); return;
+  }
+  const tones=st?(st.kind==='pair'?[st.lo.midi%12,st.hi.midi%12]:tonesOf(key,st.ch)):[];
+  const lo=Math.min(...ff), hiF=Math.max(...ff), frs=[0];
+  for(let f=(pos===1?1:lo);f<=hiF;f++) frs.push(f);
+  maps.forEach((m,s)=>frs.forEach(fr=>{
+    if(st&&((s===st.lo.s&&fr===st.lo.fret)||(s===st.hi.s&&fr===st.hi.fret))) return;
+    const pc=(STR[s].m+fr)%12, inScale=m.some(e=>e.fret===fr), isTone=tones.includes(pc);
+    if(!inScale&&!isTone) return;
+    const y=fr?Y(fr):NUT-24, x=SX(s,fr?y:NUT);
+    if(isTone) el('circle',{cx:x,cy:y,r:7,fill:'none',stroke:'var(--note)','stroke-width':1.6,opacity:.6},g);
+    if(inScale) el('circle',{cx:x,cy:y,r:2.8,fill:'var(--ghost)'},g);
+  }));
+  if(!st){host.replaceChildren(svg);return;}
+  const pts=[st.lo,st.hi].map(n=>{const y=n.fret?Y(n.fret):NUT-24;return {n,y,x:SX(n.s,n.fret?y:NUT)};});
+  if(st.across){const a=pts[0],b=pts[1];el('rect',{x:a.x-15,y:a.y-15,width:b.x-a.x+30,height:30,rx:15,fill:'var(--note)',opacity:.28},g);}
+  const by=VB_H-78, bx0=SX(st.lo.s,by)-11, bx1=SX(st.hi.s,by)+11;
+  el('rect',{x:bx0,y:by-4,width:bx1-bx0,height:8,rx:4,fill:'var(--bow)',opacity:.9},svg);
+  el('text',{x:(bx0+bx1)/2,y:by+20,'text-anchor':'middle','font-family':'var(--sans)','font-size':10.5,'font-weight':600,'letter-spacing':'.06em',fill:'var(--note-label)',opacity:.85,stroke:'var(--ebony)','stroke-width':3,'paint-order':'stroke'},svg,st.kind==='single'?'BOW':'BOW BOTH');
+  const lab={'text-anchor':'middle','font-family':'var(--sans)','font-size':11.5,'font-weight':700,fill:'var(--note-label)',stroke:'var(--ebony)','stroke-width':3.5,'paint-order':'stroke'};
+  pts.forEach(({n,x,y})=>{
+    if(n.fret){
+      el('circle',{cx:x,cy:y,r:14,fill:'var(--note)'},svg);
+      el('text',{x,y:y+4.8,'text-anchor':'middle','font-family':'var(--sans)','font-size':14,'font-weight':700,fill:'var(--note-ink)'},svg,n.finger);
+      el('text',Object.assign({x,y:y+29},lab),svg,n.name+n.oct);
+    }else{
+      el('circle',{cx:x,cy:y,r:12.5,fill:'var(--pegbox)',stroke:'var(--note)','stroke-width':2.6},svg);
+      el('text',{x,y:y+4.6,'text-anchor':'middle','font-family':'var(--sans)','font-size':13,'font-weight':700,fill:'var(--note)'},svg,'0');
+      el('text',Object.assign({x,y:NUT+15},lab),svg,n.name+n.oct);
+    }
+  });
+  host.replaceChildren(svg);
+}
+
+/* ---------- info panel ---------- */
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const numHTML=ch=>esc(ch.num)+(ch.sup?`<sup>${esc(ch.sup)}</sup>`:'');
+function noteRow(n,kind){
+  const role=kind==='pair'?esc(n.role)+' of the scale':n.r?esc(n.role)+' of the chord':'passing note, outside the chord';
+  return `<div class="note"><div class="nm">${esc(n.name)}<small>${n.oct}</small></div><div class="where">${esc(n.str)} string · ${esc(n.ftxt)}</div><div class="role">${role}</div></div>`;
+}
+function colourLine(st){
+  if(st.kind==='pair'){const b=[st.hi,st.lo].find(n=>n.deg==='♭5');return b?`<p class="colour"><b>${esc(b.name)}</b> is the ♭5, the blue note. Lean on it, or slide it up a half step into the 5th.</p>`:'';}
+  const m=st.ch.must; if(!m) return '';
+  const n=[st.hi,st.lo].find(x=>x.r===m); if(!n) return '';
+  const o=n===st.hi?st.lo:st.hi;
+  return `<p class="colour"><b>${esc(n.name)}</b> is the ${esc(n.role)}, the colour note of ${esc(st.ci.sym)}. The ${esc(o.role)} ${o===st.lo?'underneath':'above'} it anchors the chord.</p>`;
+}
+function infoHTML(st,eyebrow,extra){
+  if(st.kind==='single'){
+    const n=st.lo, role=n.r?esc(n.role)+' of '+esc(st.ci.sym):'passing note, outside the chord';
+    return `<div class="eyebrow">${eyebrow}</div>
+  <h2 class="name"><span class="num">${esc(n.name)}<sup>${n.oct}</sup></span><span class="rest">${role}</span></h2>
+  <div class="sub"><strong>${esc(st.ci.long)}</strong> (${st.ci.tones.map(esc).join(' · ')})<br>${esc(n.str)} string · ${esc(n.ftxt)}</div>
+  <div class="notes">${noteRow(n,st.kind)}</div>${extra||''}`;
+  }
+  return `<div class="eyebrow">${eyebrow}</div>
+  <h2 class="name"><span class="num">${numHTML(st.ch)}</span><span class="rest">${st.kind==='pair'?'scale double stop':'chord double stop'}</span></h2>
+  <div class="sub"><strong>${esc(st.ci.long)}</strong> (${st.ci.tones.map(esc).join(' · ')})<br>${esc(st.ivl[0].toUpperCase()+st.ivl.slice(1))} on the ${st.lo.str} and ${st.hi.str} strings</div>
+  ${colourLine(st)}
+  <div class="notes">${noteRow(st.hi,st.kind)}${noteRow(st.lo,st.kind)}</div>
+  <p class="tip">${esc(tipFor(st))}</p>${extra||''}`;
+}
+
+/* ---------- drill ---------- */
+const $=id=>document.getElementById(id);
+const tonicSel=$('tonic'), scaleSel=$('scale');
+TONICS.forEach(([v,l])=>{const o=document.createElement('option');o.value=v;o.textContent=l;tonicSel.appendChild(o);});
+[...new Set(SCALES.map(x=>x.grp))].forEach(gl=>{const og=document.createElement('optgroup');og.label=gl;
+  SCALES.filter(x=>x.grp===gl).forEach(x=>{const o=document.createElement('option');o.value=x.id;o.textContent=x.label;og.appendChild(o);});scaleSel.appendChild(og);});
+const famSeg=$('famSeg');
+FAMILIES.forEach(f=>{const b=document.createElement('button');b.textContent=f.label;b.dataset.f=f.id;b.onclick=()=>{T.fam=f.id;store.set('fam',f.id);T.chord='all';T.ai=0;refresh();if(mode==='arp')renderArp(true);else renderDrill(true);};famSeg.appendChild(b);});
+function shuffled(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function refresh(keepSig){
+  const key=curKey(), all=buildStops(key,T.pos,T.fam);
+  let list=all.filter(s=>chordMatch(s)&&(T.cat==='all'||s.cat===T.cat));
+  if(T.shuffle) list=shuffled(list);
+  T.list=list;
+  const j=keepSig?list.findIndex(s=>s.sig===keepSig):-1;
+  T.i=j>=0?j:0;
+  renderChips();
+}
+function chordMatch(s){return T.chord==='all'||(T.chord.startsWith('deg:')?!!(s.degs&&s.degs.includes(T.chord.slice(4))):s.ch.id===T.chord);}
+function renderScaleLine(key){
+  $('scaleLine').innerHTML=`<div class="sl-notes" aria-label="Scale notes">${key.names.map((n,i)=>`<span class="sl-n${/[♭♯]/.test(key.degs[i])?' alt':''}"><b>${esc(n)}</b><i>${esc(key.degs[i])}</i></span>`).join('')}</div><p class="sl-note">${esc(key.scale.note)}</p><button class="toggle" id="showScale" aria-pressed="${T.view==='scale'}">Show all notes</button>`;
+  $('showScale').onclick=()=>{ if(T.view==='scale') renderDrill(true); else renderScaleView(); };
+}
+function renderChips(){
+  const key=curKey(), all=buildStops(key,T.pos,T.fam);
+  const cc=$('chordChips'); cc.replaceChildren();
+  const mkChip=(parent,pressed,count,html,on)=>{const b=document.createElement('button');b.className='chip';b.setAttribute('aria-pressed',pressed);b.innerHTML=html+` <em>${count}</em>`;b.disabled=!count&&!pressed;b.onclick=on;parent.appendChild(b);};
+  const inCat=s=>T.cat==='all'||s.cat===T.cat;
+  if(key.hept){
+    mkChip(cc,T.chord==='all',all.filter(inCat).length,'<span class="t">All chords</span>',()=>{T.chord='all';refresh();renderDrill(true);});
+    buildChords(key,T.fam).forEach(ch=>{
+      const n=all.filter(s=>s.ch.id===ch.id&&inCat(s)).length;
+      mkChip(cc,T.chord===ch.id,n,`<b>${numHTML(ch)}</b><span>${esc(chordInfo(key,ch).sym)}</span>`,()=>{T.chord=ch.id;refresh();renderDrill(true);});
+    });
+  } else {
+    mkChip(cc,T.chord==='all',all.filter(inCat).length,'<span class="t">All pairs</span>',()=>{T.chord='all';refresh();renderDrill(true);});
+    key.degs.forEach((dg,i)=>{
+      const n=all.filter(s=>s.degs.includes(dg)&&inCat(s)).length;
+      mkChip(cc,T.chord==='deg:'+dg,n,`<span>with</span><b>${esc(dg)}</b><span>${esc(key.names[i])}</span>`,()=>{T.chord='deg:'+dg;refresh();renderDrill(true);});
+    });
+  }
+  $('famRow').hidden=!key.hept;
+  renderScaleLine(key);
+  $('lgRing').textContent=key.hept?'other notes of this chord':'the same two notes elsewhere';
+  const kc=$('catChips'); kc.replaceChildren();
+  const inCh=chordMatch;
+  CATS.forEach(c=>{
+    const n=all.filter(s=>inCh(s)&&(c.id==='all'||s.cat===c.id)).length;
+    mkChip(kc,T.cat===c.id,n,`<span class="t">${esc(c.label)}</span>`,()=>{T.cat=c.id;refresh();renderDrill(true);});
+  });
+  tonicSel.value=T.tonic; scaleSel.value=T.scale;
+  $('pos1').setAttribute('aria-pressed',T.pos===1);$('pos3').setAttribute('aria-pressed',T.pos===3);
+  $('shuffle').setAttribute('aria-pressed',T.shuffle);
+  famSeg.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.f===T.fam));
+}
+/* ---------- scale view ---------- */
+function scaleInfoHTML(key,pos){
+  const sc=key.scale, n=key.pcs.length;
+  const steps=key.pcs.map((p,i)=>{const d=(key.pcs[(i+1)%n]-p+12)%12;return d===1?'H':d===2?'W':d===3?'1½':String(d);});
+  const rows=[0,1,2,3].map(s=>{
+    const m=stringMap(key,pos,s).filter(e=>pos===1||e.fret);
+    return `<div class="srow"><span class="sname">${STR[s].n}</span><span class="snotes">${m.map(e=>{const mi=STR[s].m+e.fret, isT=mi%12===key.pcs[0];
+      return `<span class="sc${isT?' t':''}"><b>${esc(spell(key,mi).name)}</b><i>${e.finger}</i></span>`;}).join('')}</span></div>`;}).join('');
+  return `<div class="eyebrow">${esc(key.label)} · ${pos===1?'1st':'3rd'} position · all notes</div>
+  <h2 class="name"><span class="num">${esc(key.names[0])}</span><span class="rest">${esc(sc.short[0].toUpperCase()+sc.short.slice(1))} scale</span></h2>
+  <div class="sub"><strong>${n} notes: ${key.names.map(esc).join(' ')}</strong><br>Steps: ${steps.join(' ')} <span class="stepkey">(W whole step, H half step${steps.includes('1½')?', 1½ a step and a half':''})</span></div>
+  <div class="strs"><div class="strs-h">String by string<span>finger number under each note, 0 is open</span></div>${rows}</div>
+  <p class="tip">Play it slowly up and down, saying each note name as you go. Then press Next to drill this scale’s double stops.</p>`;
+}
+function scaleRun(key,pos){
+  const all=[];
+  [0,1,2,3].forEach(s=>stringMap(key,pos,s).forEach(e=>{ if(pos===3&&!e.fret) return; all.push({s,fret:e.fret,midi:STR[s].m+e.fret}); }));
+  all.sort((a,b)=>a.midi-b.midi||b.s-a.s);
+  const u=[]; all.forEach(x=>{ if(!u.length||u[u.length-1].midi!==x.midi) u.push(x); });
+  const t=key.pcs[0]; let i0=-1,i1=-1; u.forEach((x,i)=>{ if(x.midi%12===t){ if(i0<0) i0=i; i1=i; } });
+  const up=(i0>=0&&i1>i0)?u.slice(i0,i1+1):u;
+  return up.concat(up.slice(0,-1).reverse());
+}
+const SC={on:false,timers:[]};
+function ringAt(p){const r=document.getElementById('scRing'); if(!r) return; if(p){r.setAttribute('cx',p.x);r.setAttribute('cy',p.y);r.setAttribute('opacity',1);} else r.setAttribute('opacity',0);}
+function stopScale(){ if(!SC.on) return; SC.on=false; SC.timers.forEach(clearTimeout); SC.timers=[]; hush(); ringAt(null); setAlt(); }
+function playScale(){
+  if(SC.on){stopScale();return;}
+  const c=audio(); if(!c) return; hush();
+  const run=scaleRun(curKey(),T.pos), gap=.42, t0=c.currentTime+.05;
+  SC.on=true; setAlt();
+  run.forEach((x,i)=>{
+    voice(x.midi,t0+i*gap,i===run.length-1?1.1:gap*.92,.22);
+    SC.timers.push(setTimeout(()=>ringAt(SCALE_POS[x.s+'-'+x.fret]),(i*gap+.05)*1000));
+  });
+  SC.timers.push(setTimeout(()=>{SC.on=false;SC.timers=[];ringAt(null);setAlt();},(run.length*gap+1)*1000));
+}
+function syncView(){
+  const sv=mode==='drill'&&T.view==='scale', ar=mode==='arp';
+  const b=$('showScale'); if(b) b.setAttribute('aria-pressed',sv);
+  $('legendScale').hidden=!sv; $('legendStop').hidden=sv||ar; $('legendArp').hidden=!ar;
+  setAlt();
+}
+function renderScaleView(){
+  stopScale(); $('catChips').hidden=false; $('shuffle').hidden=false; T.view='scale';
+  const key=curKey();
+  renderBoard($('boardbox'),null,key,T.pos,'scale');
+  $('info').innerHTML=scaleInfoHTML(key,T.pos);
+  syncView();
+}
+function renderTrainer(autoplay){ if(mode==='arp'){ renderArp(autoplay); return; } $('catChips').hidden=false; $('shuffle').hidden=false; if(T.view==='scale') renderScaleView(); else renderDrill(autoplay); }
+function renderDrill(autoplay){
+  $('lgNote').textContent='the two notes to play';
+  stopScale(); $('catChips').hidden=false; $('shuffle').hidden=false; T.view='stop'; syncView();
+  const key=curKey(), st=T.list[T.i];
+  if(!st){
+    renderBoard($('boardbox'),null,key,T.pos);
+    $('info').innerHTML=`<div class="empty">No double stops match this ${key.hept?'chord':'note'} and interval in ${T.pos===1?'1st':'3rd'} position.<br><button class="toggle" id="clearCat">Show all intervals</button></div>`;
+    $('clearCat').onclick=()=>{T.cat='all';refresh();renderDrill();};
+    return;
+  }
+  renderBoard($('boardbox'),st,key,T.pos);
+  $('info').innerHTML=infoHTML(st,`${esc(key.label)} · ${T.pos===1?'1st':'3rd'} position · ${T.i+1} of ${T.list.length}`);
+  if(autoplay&&sound) playStop(st);
+}
+
+/* ---------- arpeggios ---------- */
+/* every chord-tone note the hand reaches in this position, and the run from the lowest root to the highest and back */
+function arpChords(key){
+  if(key.hept) return buildChords(key,T.fam);
+  const has=i=>key.pcs.includes((key.pcs[0]+i)%12), out=[], r=key.names[0];
+  const nm=i=>key.names[key.pcs.indexOf((key.pcs[0]+i)%12)];
+  const third=has(4)?4:has(3)?3:0;
+  if(third&&has(7)){
+    const mj=third===4;
+    out.push({id:'t3',num:mj?'I':'i',sup:'',sym:r+(mj?'':'m'),long:r+(mj?' major':' minor'),tones:[r,nm(third),nm(7)],roles:[1,3,5],d:0});
+    if(has(10)) out.push({id:'t7',num:mj?'I':'i',sup:'7',sym:r+(mj?'7':'m7'),long:r+(mj?' dominant 7th':' minor 7th'),tones:[r,nm(third),nm(7),nm(10)],roles:[1,3,5,7],d:0});
+    else if(has(9)) out.push({id:'t6',num:mj?'I':'i',sup:'6',sym:r+(mj?'6':'m6'),long:r+(mj?' major 6th':' minor 6th'),tones:[r,nm(third),nm(7),nm(9)],roles:[1,3,5,6],rl:['root','3rd','5th','6th'],d:0});
+  }
+  return out;
+}
+const arpCache={};
+function buildArp(key,pos,ch){
+  const ck=key.id+'|'+pos+'|'+(ch.fam||'x')+'|'+ch.id; if(arpCache[ck]) return arpCache[ck];
+  const tones=tonesOf(key,ch), roles=rolesOf(ch), ci=chordInfo(key,ch), root=tones[0];
+  const notes=[];
+  [0,1,2,3].forEach(s=>stringMap(key,pos,s).forEach(e=>{
+    if(pos===3&&!e.fret) return;
+    const midi=STR[s].m+e.fret, ix=tones.indexOf(midi%12); if(ix<0) return;
+    const sp=spell(key,midi), r=roles[ix];
+    notes.push({s,str:STR[s].n,fret:e.fret,finger:e.finger,midi,name:sp.name,oct:sp.oct,r,role:ch.rl?ch.rl[ix]:ROLE_TXT(r,(midi%12-root+12)%12),ftxt:fingerText(e.finger,e.fret,pos)});
+  }));
+  /* the run: one note per pitch, preferring the higher string (open strings in 1st position) */
+  const all=notes.slice().sort((a,b)=>a.midi-b.midi||b.s-a.s), u=[];
+  all.forEach(x=>{ if(!u.length||u[u.length-1].midi!==x.midi) u.push(x); });
+  let i0=-1,i1=-1; u.forEach((x,i)=>{ if(x.r===1){ if(i0<0) i0=i; i1=i; } });
+  const up=(i0>=0&&i1>i0)?u.slice(i0,i1+1):u;
+  return arpCache[ck]={ch,ci,sym:ci.sym,tones,notes,up,run:up.concat(up.slice(0,-1).reverse()),octaves:up.length?Math.round((up[up.length-1].midi-up[0].midi)/12):0};
+}
+function arpTip(A,pos){
+  const same=[]; for(let i=1;i<A.up.length;i++){const a=A.up[i-1],b=A.up[i]; if(a.finger&&a.finger===b.finger&&a.fret===b.fret&&b.s===a.s+1) same.push(a.name+'–'+b.name);}
+  const opens=A.up.filter(n=>!n.finger).length;
+  if(same.length) return `${same.join(', ')} ${same.length>1?'are fifths':'is a fifth'} under one finger. Lay the pad flat across both strings rather than hopping, and the arpeggio stays smooth.`;
+  if(pos===3) return 'No open strings in 3rd position. Rest the base of your hand lightly against the violin shoulder so every note comes from the same frame, and keep the thumb opposite the 1st finger.';
+  if(opens>1) return 'Open strings ring louder than stopped notes. Lighten the bow on them so the arpeggio sounds even, and let your fingers stay down where you can.';
+  return 'Set the 1st finger first and keep it down while the higher fingers reach. Cross strings with the elbow, not the wrist, so each new string arrives on time.';
+}
+const AR={on:false,all:false,timers:[]};
+function arpList(){ return arpChords(curKey()); }
+function curArp(){ const l=arpList(); if(!l.length) return null; T.ai=Math.min(Math.max(0,T.ai),l.length-1); return buildArp(curKey(),T.pos,l[T.ai]); }
+function stopArp(){ if(!AR.on) return; AR.on=false; AR.all=false; AR.timers.forEach(clearTimeout); AR.timers=[]; hush(); ringAt(null); setAlt(); }
+function playArp(all){
+  if(AR.on){stopArp();return;}
+  const c=audio(); if(!c) return; hush();
+  AR.on=true; AR.all=!!all; setAlt();
+  const go=()=>{
+    if(!AR.on) return;
+    const A=curArp(); if(!A||!A.run.length){stopArp();return;}
+    const gap=.36, t0=AC.currentTime+.05;
+    A.run.forEach((x,i)=>{
+      voice(x.midi,t0+i*gap,i===A.run.length-1?1:gap*.92,.22);
+      AR.timers.push(setTimeout(()=>ringAt(SCALE_POS[x.s+'-'+x.fret]),(i*gap+.05)*1000));
+    });
+    AR.timers.push(setTimeout(()=>{
+      ringAt(null);
+      const l=arpList();
+      if(AR.all&&T.ai<l.length-1){ T.ai++; renderArp(false,true); AR.timers.push(setTimeout(go,250)); }
+      else { AR.on=false; AR.all=false; AR.timers=[]; setAlt(); }
+    },(A.run.length*gap+.9)*1000));
+  };
+  go();
+}
+function renderArpChips(){
+  const key=curKey(), l=arpList(), cc=$('chordChips'); cc.replaceChildren();
+  l.forEach((ch,i)=>{
+    const A=buildArp(key,T.pos,ch), b=document.createElement('button');
+    b.className='chip'; b.setAttribute('aria-pressed',i===T.ai);
+    b.innerHTML=`<b>${numHTML(ch)}</b><span>${esc(A.sym)}</span>`;
+    b.onclick=()=>{stopArp();T.ai=i;renderArp(true);}; cc.appendChild(b);
+  });
+  $('catChips').hidden=true; $('shuffle').hidden=true;
+  $('famRow').hidden=!key.hept;
+  renderScaleLine(key); const sb=$('showScale'); if(sb) sb.hidden=true;
+  tonicSel.value=T.tonic; scaleSel.value=T.scale;
+  $('pos1').setAttribute('aria-pressed',T.pos===1);$('pos3').setAttribute('aria-pressed',T.pos===3);
+  famSeg.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.f===T.fam));
+  const on=cc.querySelector('[aria-pressed="true"]'); if(on) requestAnimationFrame(()=>{try{cc.scrollLeft=Math.max(0,on.offsetLeft-cc.clientWidth/2+on.clientWidth/2);}catch(e){}});
+}
+function arpInfoHTML(A,key,pos,i,n){
+  const tonesTxt=A.tones.map((pc,k)=>{const nn=A.notes.find(x=>x.midi%12===pc);return esc(nn?nn.name:A.ci.tones[k])+' <span class="stepkey">'+esc(nn?nn.role:'')+'</span>';}).join(' · ');
+  const rows=[0,1,2,3].map(s=>{
+    const m=A.notes.filter(x=>x.s===s);
+    return `<div class="srow"><span class="sname">${STR[s].n}</span><span class="snotes">${m.length?m.map(x=>`<span class="sc${x.r===1?' t':''}"><b>${esc(x.name)}</b><i>${x.finger}</i></span>`).join(''):'<span class="stepkey">none in reach</span>'}</span></div>`;}).join('');
+  const seq=A.up.map(x=>`<span class="sc${x.r===1?' t':''}"><b>${esc(x.name)}<small style="font-size:.6em;opacity:.7">${x.oct}</small></b><i>${x.str}${x.finger}</i></span>`).join('');
+  const missing=A.tones.filter(pc=>!A.notes.some(x=>x.midi%12===pc)).length;
+  return `<div class="eyebrow">${esc(key.label)} · ${pos===1?'1st':'3rd'} position · ${i+1} of ${n}</div>
+  <h2 class="name"><span class="num">${numHTML(A.ch)}</span><span class="rest">${esc(A.sym)} arpeggio</span></h2>
+  <div class="sub"><strong>${esc(A.ci.long)}</strong><br>${tonesTxt}</div>
+  <div class="strs"><div class="strs-h">Up the arpeggio<span>${A.up.length} notes${A.octaves?', '+A.octaves+' octave'+(A.octaves>1?'s':''):''}; string and finger under each, 0 is open</span></div><div class="snotes">${seq}</div></div>
+  <div class="strs"><div class="strs-h">String by string<span>every note of this chord in reach</span></div>${rows}</div>
+  ${missing?`<p class="colour">${missing===1?'One chord tone has':missing+' chord tones have'} no spot in this position, so the run skips ${missing===1?'it':'them'}.</p>`:''}
+  <p class="tip">${esc(arpTip(A,pos))}</p>`;
+}
+function renderArp(autoplay,fromRun){
+  if(!fromRun) stopArp();
+  stopScale(); syncView();
+  const key=curKey(), l=arpList();
+  renderArpChips();
+  if(!l.length){
+    renderBoard($('boardbox'),null,key,T.pos);
+    $('info').innerHTML=`<div class="empty">This scale has no full chord to arpeggiate. Pick a major, minor or modal scale.</div>`;
+    return;
+  }
+  const A=curArp(); store.set('arp',T.ai);
+  renderBoard($('boardbox'),A,key,T.pos,'arp');
+  $('info').innerHTML=arpInfoHTML(A,key,T.pos,T.ai,l.length);
+  if(autoplay&&sound) playArp(false);
+}
+
+/* ---------- staff ---------- */
+const CLEF='M314 898Q344 1003 344 1070Q344 1123 307 1157Q270 1191 217 1191Q167 1191 130 1162Q93 1132 93 1090Q93 1060 114 1034Q134 1007 164 1007Q193 1007 212 1028Q230 1050 230 1078Q230 1140 160 1140Q178 1168 218 1168Q233 1168 248 1164Q264 1159 281 1148Q298 1137 308 1114Q319 1090 319 1057Q319 1036 291 906Q269 912 236 912Q139 912 70 840Q0 768 0 668Q0 633 12 597Q23 561 38 534Q52 506 80 472Q109 437 128 416Q148 396 183 361Q160 279 160 211Q160 121 193 60Q226 0 259 0Q269 0 282 13Q294 26 306 49Q318 72 326 110Q335 147 335 190Q335 349 222 453L248 571Q264 568 277 568Q338 568 380 618Q422 667 422 738Q422 856 314 898ZM306 154Q306 99 274 99Q238 99 213 152Q188 205 188 270Q188 312 201 343Q239 320 272 260Q306 201 306 154ZM378 772Q378 717 346 684Q314 651 263 651L308 877Q378 848 378 772ZM287 883 241 653Q214 659 192 686Q169 713 169 742Q169 757 175 772Q181 786 190 796Q198 806 207 814Q216 822 222 826Q228 829 228 829L220 834Q187 825 158 794Q128 763 128 716Q128 669 158 630Q187 590 223 577L205 470Q48 601 48 723Q48 796 103 845Q158 894 228 894Q245 894 287 883Z';
+const REST_Q='M0 450Q0 416 22 398Q45 380 75 380Q95 380 123 391L10 243Q90 171 90 114Q90 69 36 0H81L209 156Q126 254 126 302Q126 348 204 441L188 464Q148 441 121 441Q85 441 85 485Q85 529 124 574L110 596Q0 514 0 450Z';
+const REST_E='M117 89Q133 89 156 66Q179 42 194 21H215L119 366H82L154 106Q107 130 78 130Q49 130 24 110Q0 89 0 59Q0 37 16 18Q32 0 60 0Q87 0 103 18Q119 37 119 59Q119 74 112 87Q116 89 117 89Z';
+const REST_S='M170 88Q186 88 210 64Q234 40 246 20H268L119 554H82L154 294Q107 318 78 318Q49 318 24 298Q0 277 0 247Q0 225 16 206Q32 188 60 188Q87 188 103 206Q119 225 119 247Q119 262 112 275Q116 277 117 277Q136 277 170 240L207 106Q162 129 130 129Q102 129 77 109Q52 89 52 59Q52 33 70 16Q87 0 111 0Q136 0 154 17Q171 34 171 59Q171 74 165 86Q169 88 170 88Z';
+const S=8,TOPL=48,BOT=80,SH=146;
+const yIdx=i=>BOT-(i-30)*(S/2);
+const dIdx=n=>n.oct*7+LETTERS.indexOf(n.letter);
+const SHARP_IDX=[38,35,39,36,33,37,34];
+const evW=d=>16+d*30;
+function sharpAt(g,x,y){
+  el('path',{d:`M${x-1.6} ${y-8} V${y+9} M${x+1.6} ${y-9} V${y+8}`,class:'st-stem',style:'stroke-width:1'},g);
+  el('path',{d:`M${x-4} ${y-1.6} L${x+4} ${y-3.6} L${x+4} ${y-1.8} L${x-4} ${y+.2}Z M${x-4} ${y+3.6} L${x+4} ${y+1.6} L${x+4} ${y+3.4} L${x-4} ${y+5.4}Z`,class:'st-ink'},g);
+}
+function naturalAt(g,x,y){
+  el('path',{d:`M${x-2.4} ${y-9} V${y+3.6} M${x+2.4} ${y-3.6} V${y+9}`,class:'st-stem',style:'stroke-width:1.1'},g);
+  el('path',{d:`M${x-2.4} ${y-1.6} L${x+2.4} ${y-3.4} L${x+2.4} ${y-1.6} L${x-2.4} ${y+.2}Z M${x-2.4} ${y+3.4} L${x+2.4} ${y+1.6} L${x+2.4} ${y+3.4} L${x-2.4} ${y+5.2}Z`,class:'st-ink'},g);
+}
+function flatAt(g,x,y){
+  el('path',{d:`M${x-2.6} ${y-11} V${y+4} C${x+1} ${y+1.5} ${x+4.2} ${y-1} ${x+3.2} ${y-3.6} C${x+2.2} ${y-6} ${x-.8} ${y-4.4} ${x-2.6} ${y-1.4}`,class:'st-stem',style:'stroke-width:1.4;fill:none'},g);
+}
+const accAt=(g,a,x,y)=>a==='♯'?sharpAt(g,x,y):a==='♭'?flatAt(g,x,y):naturalAt(g,x,y);
+let staff=null;
+function buildStaff(pc){
+  const def=pc.def, nSh=pc.key.sharps;
+  const timeX=40+nSh*10+12, HEAD=timeX+22;
+  const barW=def.bars.map(b=>16+b.reduce((a,e)=>a+evW(e[1]),0)+6);
+  const W=HEAD+barW.reduce((a,b)=>a+b,0)+10;
+  const svg=el('svg',{width:W,height:SH,viewBox:`0 0 ${W} ${SH}`,role:'img','aria-label':def.title+' score'});
+  el('g',{class:'hl'},svg);
+  for(let k=0;k<5;k++) el('line',{x1:6,x2:W-6,y1:TOPL+k*S,y2:TOPL+k*S,class:'st-line'},svg);
+  const kc=0.049; el('path',{d:CLEF,class:'st-ink',transform:`translate(10 ${(BOT-S)-740*kc}) scale(${kc})`},svg);
+  for(let i=0;i<nSh;i++) sharpAt(svg,42+i*10,yIdx(SHARP_IDX[i]));
+  const ksig={}; pc.key.names.forEach(n=>{if(n.length>1) ksig[n[0]]=n[1];});
+  let accBar=0, accState={};
+  el('text',{x:timeX,y:TOPL+15,'text-anchor':'middle',class:'st-time'},svg,def.time[0]);
+  el('text',{x:timeX,y:TOPL+31,'text-anchor':'middle',class:'st-time'},svg,def.time[1]);
+  if(def.swing) el('text',{x:HEAD,y:12,class:'st-swing'},svg,'Swing');
+  const ex=[], ewd=[];
+  // positions + barlines
+  let bx=HEAD;
+  const barStart=[];
+  def.bars.forEach((b,bi)=>{
+    barStart.push(bx);
+    const exn=bx+barW[bi];
+    const dbl=(def.dbl||[]).includes(bi+1);
+    if(bi===def.bars.length-1){el('line',{x1:exn-8,x2:exn-8,y1:TOPL,y2:BOT,class:'st-bar'},svg);el('line',{x1:exn-2,x2:exn-2,y1:TOPL,y2:BOT,class:'st-thick'},svg);}
+    else if(dbl){el('line',{x1:exn-3,x2:exn-3,y1:TOPL,y2:BOT,class:'st-bar'},svg);el('line',{x1:exn,x2:exn,y1:TOPL,y2:BOT,class:'st-bar'},svg);}
+    else el('line',{x1:exn,x2:exn,y1:TOPL,y2:BOT,class:'st-bar'},svg);
+    bx=exn;
+  });
+  const cursorInBar={};
+  pc.events.forEach(e=>{const b=e.bar-1;const c=cursorInBar[b]||0;const x=barStart[b]+16+c+10;cursorInBar[b]=c+evW(e.dur);ex.push(x);ewd.push(evW(e.dur));});
+  // beam groups
+  const gu=def.time[1]===8?1.5:1, groups={};
+  let seg=0;
+  pc.events.forEach((e,i)=>{
+    if(e.rest||e.dur>=1){seg++;return;}
+    const g0=Math.floor(e.p/gu+1e-6), g1=Math.floor((e.p+e.dur)/gu-1e-6);
+    if(g0!==g1){seg++;return;}
+    const k=e.bar+':'+g0+':'+seg;(groups[k]=groups[k]||[]).push(i);
+  });
+  const beamOf={};
+  Object.values(groups).forEach(ids=>{if(ids.length>1) ids.forEach(i=>beamOf[i]=ids);});
+  const notesG=el('g',{},svg), groupsG={};
+  let lastChord=null, lastChordRight=-1;
+  const geom=i=>{const e=pc.events[i];const iL=dIdx(e.lo),iH=dIdx(e.hi);return {iL,iH,yL:yIdx(iL),yH:yIdx(iH)};};
+  pc.events.forEach((e,i)=>{
+    const x=ex[i];
+    if(e.rest){
+      const rg=el('g',{},notesG);
+      if(e.dur>=2) el('rect',{x:x-5,y:TOPL+2*S-4,width:10,height:4,class:'st-ink'},rg);
+      else if(e.dur>=1) el('path',{d:REST_Q,class:'st-ink',transform:`translate(${x-4.2} ${TOPL+S*.5}) scale(.0403)`},rg);
+      else if(e.dur>=.5) el('path',{d:REST_E,class:'st-ink',transform:`translate(${x-4.7} ${TOPL+S}) scale(.0437)`},rg);
+      else el('path',{d:REST_S,class:'st-ink',transform:`translate(${x-5.3} ${TOPL+S}) scale(.0397)`},rg);
+      return;
+    }
+    const gg=el('g',{class:'st-step','data-i':e.si},notesG); groupsG[e.si]=gg;
+    const {iL,iH,yL,yH}=geom(i);
+    // accidentals: shown when a note differs from the key signature or an earlier accidental in the bar
+    if(e.bar!==accBar){accBar=e.bar;accState={};}
+    const need=[e.lo,e.hi].map(n=>{const k=n.letter+n.oct, cur=k in accState?accState[k]:(ksig[n.letter]||'');if(n.acc!==cur){accState[k]=n.acc;return true;}return false;});
+    if(need[1]) accAt(gg,e.hi.acc,x-12,yIdx(iH));
+    if(need[0]) accAt(gg,e.lo.acc,(need[1]&&iH-iL<6)?x-22:x-12,yIdx(iL));
+    // chord symbol
+    if(e.ch.id!==lastChord){
+      const sym=e.ci.sym, tx=Math.max(x-6,lastChordRight+6);
+      el('text',{x:tx,y:24,class:'st-chord'},svg,sym);
+      lastChordRight=tx+sym.length*7.6; lastChord=e.ch.id;
+    }
+    // count
+    const cnt=countOf(pc,e.p);
+    el('text',{x,y:140,'text-anchor':'middle',class:'st-count'+(/^\d$/.test(cnt)?' b':'')},svg,cnt);
+    const grp=beamOf[i];
+    let up;
+    if(grp){const all=grp.flatMap(j=>{const g=geom(j);return [g.iL,g.iH];});up=all.reduce((a,b)=>a+b,0)/all.length<34;}
+    else up=(iL+iH)/2<34;
+    const second=iH-iL===1;
+    const xL=(!up&&second)?x+9.8:x, xH=(up&&second)?x+9.8:x;
+    [[iL,xL],[iH,xH]].forEach(([ix,hx])=>{
+      for(let l=40;l<=ix;l+=2) el('line',{x1:hx-8.5,x2:hx+8.5,y1:yIdx(l),y2:yIdx(l),class:'st-stem'},gg);
+      for(let l=28;l>=ix;l-=2) el('line',{x1:hx-8.5,x2:hx+8.5,y1:yIdx(l),y2:yIdx(l),class:'st-stem'},gg);
+      const y=yIdx(ix);
+      el('ellipse',{cx:hx,cy:y,rx:5.2,ry:3.8,transform:`rotate(-22 ${hx} ${y})`,class:e.dur>=2?'st-open':'st-head'},gg);
+      if([.75,1.5,3].includes(e.dur)){const dy=((ix-30)%2===0)?-S/2:0;el('circle',{cx:Math.max(xL,xH)+10,cy:y+dy,r:1.7,class:'st-head'},gg);}
+    });
+    if(e.dur>=4) return;
+    const sx=up?x+4.9:(second?x+4.9:x-4.9);
+    let sEnd;
+    if(grp){
+      const gs=grp.map(geom);
+      sEnd=up?Math.min(...gs.map(g=>g.yH))-26:Math.max(...gs.map(g=>g.yL))+26;
+      if(!up&&!second){} // stems on the left
+    } else sEnd=up?yH-28:yL+28;
+    el('line',{x1:sx,x2:sx,y1:up?yL:yH,y2:sEnd,class:'st-stem'},gg);
+    if(!grp&&e.dur<1){
+      const n=e.dur<=.25?2:1;
+      for(let k=0;k<n;k++){
+        const fy=up?sEnd+k*6:sEnd-k*6;
+        el('path',{d:up?`M${sx} ${fy} c0 5 8.5 7 7.5 15 c-.8-5.5-3.5-8-7.5-8.5z`:`M${sx} ${fy} c0 -5 8.5 -7 7.5 -15 c-.8 5.5-3.5 8-7.5 8.5z`,class:'st-ink'},gg);
+      }
+    }
+    e._sx=sx; e._sEnd=sEnd; e._up=up;
+  });
+  // beams
+  Object.values(groups).forEach(ids=>{
+    if(ids.length<2) return;
+    const evs=ids.map(i=>pc.events[i]), up=evs[0]._up, by=evs[0]._sEnd, x0=evs[0]._sx-.65, x1=evs[evs.length-1]._sx+.65;
+    const host=groupsG[evs[0].si];
+    const bar=(a,b,y)=>el('path',{d:`M${a} ${y} H${b} V${y+4.2} H${a}Z`,class:'st-ink'},notesG);
+    bar(x0,x1,up?by:by-4.2);
+    evs.forEach((e,k)=>{
+      if(e.dur>.25) return;
+      const nx=evs[k+1], pv=evs[k-1];
+      const adj=(a,b)=>b&&Math.abs(a.p+a.dur-b.p)<1e-6;
+      const y2=up?by+7:by-11.2;
+      if(nx&&nx.dur<=.25&&adj(e,nx)) bar(e._sx-.65,nx._sx+.65,y2);
+      else if(!(pv&&pv.dur<=.25&&adj(pv,e))){ if(k===evs.length-1) bar(e._sx-9,e._sx+.65,y2); else bar(e._sx-.65,e._sx+9,y2); }
+    });
+    void host;
+  });
+  // hit targets
+  pc.events.forEach((e,i)=>{
+    if(e.rest) return;
+    const hit=el('rect',{x:ex[i]-14,y:0,width:ewd[i],height:SH,class:'st-hit'},svg);
+    hit.addEventListener('click',()=>{stopRun();P.i=e.si;renderPiece(true);});
+  });
+  staff={id:def.id,svg,ex,ewd,groupsG};
+  $('staffbox').replaceChildren(svg);
+}
+
+/* ---------- piece view ---------- */
+const spqOf=pc=>(60/bpmOf(pc.def.id))*(pc.def.unit==='dq'?2/3:1);
+const tempoTxt=pc=>(pc.def.unit==='dq'?'♩. = ':'♩ = ')+bpmOf(pc.def.id);
+function renderPieceHead(){
+  const pc=curPiece(), d=pc.def;
+  const pcs=$('pieceChips'); pcs.replaceChildren();
+  const ORDER=['danube','nachtarp','canonarp','prelude','cello','twinkle','nacht','bourree','spring','gymno','ode','canon','minuet','silent','grace','auld','saints','sailor','yankee','london','frere'];
+  const rank=p=>{const i=ORDER.indexOf(p.id);return i<0?999:i;};
+  [['arp','Arpeggio classics'],['study','Studies'],['classic','Classics'],['bluegrass','Bluegrass']].forEach(([gid,gl])=>{
+    const l=document.createElement('span');l.className='glabel';l.textContent=gl;pcs.appendChild(l);
+    PIECES.filter(p=>(p.group||'study')===gid).sort((a,b)=>rank(a)-rank(b)).forEach(p=>{const b=document.createElement('button');b.className='pchip';b.setAttribute('aria-pressed',p.id===P.id);
+      b.innerHTML=`<strong>${esc(p.title)}</strong><span>${esc(p.tag)}</span>`;b.onclick=()=>selectPiece(p.id);pcs.appendChild(b);});
+  });
+  const on=pcs.querySelector('[aria-pressed="true"]'); if(on) requestAnimationFrame(()=>{try{pcs.scrollLeft=Math.max(0,on.offsetLeft-pcs.clientWidth/2+on.clientWidth/2);}catch(e){}});
+  $('pTitle').textContent=d.title;
+  $('pMeta').textContent=`${d.credit?d.credit+' · ':''}${d.keyLabel||pc.key.label} · ${d.time[0]}/${d.time[1]}${d.swing?' · swing':''} · first position · ${d.bars.length} bars, ${pc.steps.length} ${pc.steps[0]&&pc.steps[0].kind==='single'?'notes':'double stops'}`;
+  $('pFocus').innerHTML=d.focus;
+  const bpm=$('bpm'); bpm.value=bpmOf(d.id); $('bpmOut').textContent=tempoTxt(pc);
+}
+function selectPiece(id){
+  if(id===P.id) return;
+  stopRun(); P.id=id; P.i=0; store.set('piece',id);
+  renderPieceHead(); buildStaff(curPiece()); renderPiece(false);
+}
+function renderPiece(autoplay,fromRun){
+  const pc=curPiece(), st=pc.steps[P.i];
+  if(!staff||staff.id!==pc.def.id) buildStaff(pc);
+  Object.entries(staff.groupsG).forEach(([si,g])=>g.classList.toggle('st-cur',+si===P.i));
+  const hl=staff.svg.querySelector('.hl'); hl.replaceChildren();
+  const x=staff.ex[st.ei];
+  el('rect',{x:x-13,y:30,width:Math.max(26,staff.ewd[st.ei]-4),height:88,rx:6,class:'st-hl'},hl);
+  const box=$('staffbox');
+  if(x<box.scrollLeft+30||x>box.scrollLeft+box.clientWidth-70){
+    const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const left=Math.max(0,x-box.clientWidth*.3);
+    try{box.scrollTo({left,behavior:reduce||fromRun?'auto':'smooth'});}catch(e){box.scrollLeft=left;}
+  }
+  renderBoard($('boardbox'),st,pc.key,1);
+  $('lgNote').textContent=st.kind==='single'?'the note to play':'the two notes to play';
+  const nx=pc.steps[P.i+1];
+  const nextTxt=nx?(nx.kind==='single'?`<p class="next">Next: <b>${esc(nx.lo.name+nx.lo.oct)}</b> on “${esc(countOf(pc,nx.p))}”${nx.bar!==st.bar?' of bar '+nx.bar:''}, ${esc(nx.lo.str)} string, ${esc(nx.lo.ftxt)}</p>`:`<p class="next">Next: <b>${numHTML(nx.ch)} chord</b> on “${esc(countOf(pc,nx.p))}”${nx.bar!==st.bar?' of bar '+nx.bar:''}, ${esc(nx.hi.name+nx.hi.oct)} over ${esc(nx.lo.name+nx.lo.oct)}</p>`):`<p class="next">Last ${st.kind==='single'?'note':'chord'}. Hold it, then take it from the top.</p>`;
+  $('info').innerHTML=infoHTML(st,`Bar ${st.bar} · on “${esc(countOf(pc,st.p))}” · ${DUR[st.dur]||'note'} · ${P.i+1} of ${pc.steps.length}`,nextTxt);
+  if(autoplay&&sound&&!fromRun) playStop(st,Math.max(.45,st.dur*spqOf(pc)*.95+.1));
+}
+
+/* ---------- play along (look-ahead scheduler) ---------- */
+const R={on:false,iv:null,q:[],qi:0,ui:[],end:0};
+const beatQOf=pc=>pc.def.time[1]===8?1.5:pc.def.time[1]===2?2:1;
+function swingPos(pc,p){if(!pc.def.swing) return p;const b=Math.floor(p+1e-6),f=p-b;return b+(Math.abs(f-.5)<1e-6?2/3:f);}
+function timeline(pc,fromBar,t0){
+  const spq=spqOf(pc), barQ=pc.bpb, items=[], nb=pc.def.bars.length;
+  const beatQ=beatQOf(pc), beats=Math.round(barQ/beatQ);
+  for(let b=fromBar;b<=nb;b++){const bs=t0+(b-fromBar)*barQ*spq;for(let k=0;k<beats;k++) items.push({t:bs+k*beatQ*spq,c:true,acc:k===0});}
+  pc.events.forEach(e=>{
+    if(e.rest||e.bar<fromBar) return;
+    const bs=t0+(e.bar-fromBar)*barQ*spq, on=bs+swingPos(pc,e.p)*spq, off=bs+swingPos(pc,e.p+e.dur)*spq;
+    items.push({t:on,len:(off-on)*(e.dur<=.5?.72:.88),e});
+  });
+  items.sort((a,b)=>a.t-b.t||(a.c?-1:1));
+  return {items,end:t0+(nb-fromBar+1)*barQ*spq};
+}
+function fire(it){
+  if(it.c){ if(it.ci||P.click) clickAt(it.t,it.acc); return; }
+  if(it.e.kind==='single') voice(it.e.lo.midi,it.t,it.len,.24); else { voice(it.e.lo.midi,it.t,it.len,.19); voice(it.e.hi.midi,it.t,it.len,.19); }
+  const d=Math.max(0,(it.t-AC.currentTime)*1000);
+  R.ui.push(setTimeout(()=>{ if(!R.on) return; P.i=it.e.si; renderPiece(false,true); },d));
+}
+function tick(){
+  if(!R.on) return;
+  const pc=curPiece(), now=AC.currentTime;
+  while(R.qi<R.q.length&&R.q[R.qi].t<now+.25){fire(R.q[R.qi]);R.qi++;}
+  if(R.qi>=R.q.length){
+    if(P.loop){const tl=timeline(pc,1,R.end);R.q=tl.items;R.qi=0;R.end=tl.end;}
+    else if(now>R.end+.05) stopRun();
+  }
+  voices=voices.filter(v=>v.end>now);
+  if(R.ui.length>200) R.ui=R.ui.slice(-50);
+}
+function run(){
+  if(R.on){stopRun();return;}
+  const c=audio(); if(!c) return;
+  const pc=curPiece(), fromBar=pc.steps[P.i].bar;
+  P.i=pc.steps.findIndex(s=>s.bar===fromBar);
+  hush();
+  const spq=spqOf(pc), beatQ=beatQOf(pc), beats=Math.round(pc.bpb/beatQ), t0=c.currentTime+.12;
+  const ci=[]; for(let k=0;k<beats;k++) ci.push({t:t0+k*beatQ*spq,c:true,ci:true,acc:k===0});
+  const tl=timeline(pc,fromBar,t0+pc.bpb*spq);
+  R.q=ci.concat(tl.items); R.qi=0; R.end=tl.end; R.on=true; R.ui=[];
+  setAlt(); renderPiece(false,true);
+  R.iv=setInterval(tick,30); tick();
+}
+function stopRun(){
+  if(!R.on) return;
+  R.on=false; clearInterval(R.iv); R.ui.forEach(clearTimeout); R.ui=[]; hush(); setAlt();
+}
+
+/* ---------- controls ---------- */
+function setAlt(){
+  const lbl=$('altLbl'), b=$('alt'), pl=$('playLbl'), pb=$('play');
+  if(mode==='arp'){
+    pl.textContent=AR.on&&!AR.all?'Stop':'Play'; pb.setAttribute('aria-label',AR.on&&!AR.all?'Stop the arpeggio':'Play the arpeggio up and down');
+    lbl.textContent=AR.on&&AR.all?'Stop':'All arps'; b.setAttribute('aria-label',AR.on&&AR.all?'Stop':'Play every arpeggio in this scale in turn'); b.setAttribute('aria-pressed',AR.on&&AR.all); return;
+  }
+  const sv=mode==='drill'&&T.view==='scale';
+  pl.textContent=sv&&SC.on?'Stop':'Play';
+  pb.setAttribute('aria-label',sv?(SC.on?'Stop the scale':'Play the scale up and down'):'Play double stop');
+  if(sv){lbl.textContent='Drill';b.setAttribute('aria-label','Go to the double stops in this scale');b.removeAttribute('aria-pressed');}
+  else if(mode==='drill'){lbl.textContent='Low → high';b.setAttribute('aria-label','Play low note, high note, then both');b.removeAttribute('aria-pressed');}
+  else{lbl.textContent=R.on?'Stop':'Play along';b.setAttribute('aria-label',R.on?'Stop playing':'Play along from this bar with a count-in');b.setAttribute('aria-pressed',R.on);}
+}
+function setMode(m){
+  if(mode!==m) stopRun();
+  stopScale(); stopArp();
+  mode=m; store.set('mode',m);
+  $('tab-drill').setAttribute('aria-pressed',m==='drill'); $('tab-arp').setAttribute('aria-pressed',m==='arp'); $('tab-piece').setAttribute('aria-pressed',m==='piece');
+  $('drill').hidden=m==='piece'; $('piecebar').hidden=m!=='piece'; $('staffbox').hidden=m!=='piece';
+  setAlt();
+  if(m==='arp'){ refresh(); renderArp(false); }
+  else if(m==='drill'){ refresh(); renderTrainer(false); } else { renderPieceHead(); renderPiece(false); syncView(); }
+}
+function step(d){
+  if(mode==='arp'){ const n=arpList().length; if(!n) return; stopArp(); T.ai=(T.ai+d+n)%n; renderArp(true); return; }
+  if(mode==='drill'){ if(T.view==='scale'){ renderDrill(true); return; } if(!T.list.length) return; T.i=(T.i+d+T.list.length)%T.list.length; renderDrill(true); }
+  else { stopRun(); const n=curPiece().steps.length; P.i=Math.min(n-1,Math.max(0,P.i+d)); renderPiece(true); }
+}
+$('tab-drill').onclick=()=>setMode('drill');
+$('tab-piece').onclick=()=>setMode('piece');
+$('tab-arp').onclick=()=>setMode('arp');
+tonicSel.onchange=()=>{T.tonic=tonicSel.value;store.set('tonic',T.tonic);T.chord='all';T.ai=0;refresh();if(mode==='arp'){renderArp(true);return;}T.view='scale';renderScaleView();};
+scaleSel.onchange=()=>{T.scale=scaleSel.value;store.set('scale',T.scale);T.chord='all';T.ai=0;refresh();if(mode==='arp'){renderArp(true);return;}T.view='scale';renderScaleView();};
+$('pos1').onclick=()=>{T.pos=1;store.set('pos',1);refresh();renderTrainer(true);};
+$('pos3').onclick=()=>{T.pos=3;store.set('pos',3);refresh();renderTrainer(true);};
+$('shuffle').onclick=()=>{T.shuffle=!T.shuffle;const cur=T.list[T.i];refresh(T.shuffle?null:cur&&cur.sig);renderDrill(T.shuffle);};
+$('prev').onclick=()=>step(-1);
+$('next').onclick=()=>step(1);
+$('play').onclick=()=>{ if(mode==='arp'){ if(AR.on&&AR.all) stopArp(); playArp(false); return; } if(mode==='drill'){ if(T.view==='scale') playScale(); else playStop(T.list[T.i]); } else { stopRun(); const pc=curPiece(), st=pc.steps[P.i]; playStop(st,Math.max(1.2,st.dur*spqOf(pc))); } };
+$('alt').onclick=()=>{ if(mode==='arp'){ if(AR.on&&!AR.all) stopArp(); playArp(true); return; } if(mode==='drill'){ if(T.view==='scale') renderDrill(true); else playStop(T.list[T.i],1.6,true); } else run(); };
+const snd=$('snd'); snd.setAttribute('aria-pressed',sound);
+snd.onclick=()=>{sound=!sound;store.set('sound',sound);snd.setAttribute('aria-pressed',sound);if(!sound&&!R.on&&!AR.on)hush();};
+$('bpm').oninput=()=>{const pc=curPiece();store.set('bpm.'+pc.def.id,+$('bpm').value);$('bpmOut').textContent=tempoTxt(pc);if(R.on){stopRun();}};
+const clickT=$('clickT'), loopT=$('loopT');
+clickT.setAttribute('aria-pressed',P.click);
+clickT.onclick=()=>{P.click=!P.click;store.set('click',P.click);clickT.setAttribute('aria-pressed',P.click);};
+loopT.onclick=()=>{P.loop=!P.loop;loopT.setAttribute('aria-pressed',P.loop);};
+document.addEventListener('keydown',e=>{
+  const tg=e.target.tagName; if(tg==='SELECT'||tg==='INPUT') return;
+  if(e.key==='ArrowRight'){e.preventDefault();step(1);}
+  else if(e.key==='ArrowLeft'){e.preventDefault();step(-1);}
+  else if(e.key===' '&&tg!=='BUTTON'){e.preventDefault();$('play').click();}
+});
+let sx0=null,sy0=null;
+const bb=$('boardbox');
+bb.addEventListener('pointerdown',e=>{sx0=e.clientX;sy0=e.clientY;});
+bb.addEventListener('pointerup',e=>{if(sx0===null)return;const dx=e.clientX-sx0,dy=e.clientY-sy0;sx0=null;if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)*1.3)step(dx<0?1:-1);});
+bb.addEventListener('pointercancel',()=>{sx0=null;});
+
+/* ---------- boot ---------- */
+if(!TONICS.some(t=>t[0]===T.tonic)) T.tonic='D';
+if(!SCALES.some(x=>x.id===T.scale)) T.scale='major';
+if(T.pos!==1&&T.pos!==3) T.pos=1;
+if(!FAMILIES.some(f=>f.id===T.fam)) T.fam='3';
+T.ai=+store.get('arp',0)||0;
+refresh();
+setMode(mode==='piece'||mode==='arp'?mode:'drill');
+window.__dst={buildArp,arpChords,scaleRun,buildStops,buildScale,buildChords,SCALES,TONICS,PC,KEYS,FAMILIES,WARN};
+})();
+</script>
+
+<script>if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));</script>
+</body></html>
